@@ -1,0 +1,105 @@
+## .NET / MAUI
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# MAUI / Mobile build artifacts
+*.apk
+*.aab
+*.ipa
+*.appx
+*.appxbundle
+*.appxupload
+*.msix
+*.msixbundle
+
+# Mono Auto Generated Files
+mono_crash.*
+
+# Rider / ReSharper
+.idea/
+*.sln.iml
+
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.pidb
+*.booproj
+*.svclog
+*.scc
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.nuget.cache
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Apple / Xcode (used by iOS/MacCatalyst builds)
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# Android
+*.keystore
+local.properties
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Backup & report files
+*.bak
+*.cache
+*.ilk
+*.log
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Secrets (never commit these)
+*.pfx
+appsettings.*.local.json
+secrets.json
