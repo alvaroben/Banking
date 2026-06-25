@@ -5,18 +5,23 @@
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
-    <Color x:Key="Primary">#512BD4</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
-    <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#DFD8F7</Color>
-    <Color x:Key="SecondaryDarkText">#9880e5</Color>
-    <Color x:Key="Tertiary">#2B0B98</Color>
+    <!-- Base: azul profesional, sobrio, transmite seguridad y solidez institucional -->
+    <Color x:Key="Primary">#0B3550</Color>
+    <Color x:Key="PrimaryDark">#1A5C82</Color>
+    <Color x:Key="PrimaryDarkText">#E6F4EF</Color>
+    <Color x:Key="Secondary">#E3F8EF</Color>
+    <Color x:Key="SecondaryDarkText">#6EE7B7</Color>
+    <Color x:Key="Tertiary">#06243B</Color>
+
+    <!-- Acento: verde esmeralda/menta, catalizador de crecimiento y prosperidad -->
+    <Color x:Key="Emerald">#10B981</Color>
+    <Color x:Key="EmeraldDark">#047857</Color>
+    <Color x:Key="EmeraldLight">#6EE7B7</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
-    <Color x:Key="Magenta">#D600AA</Color>
-    <Color x:Key="MidnightBlue">#190649</Color>
-    <Color x:Key="OffBlack">#1f1f1f</Color>
+    <Color x:Key="MidnightBlue">#06243B</Color>
+    <Color x:Key="OffBlack">#10202B</Color>
 
     <Color x:Key="Gray100">#E1E1E1</Color>
     <Color x:Key="Gray200">#C8C8C8</Color>
@@ -30,6 +35,9 @@
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="EmeraldBrush" Color="{StaticResource Emerald}"/>
+    <SolidColorBrush x:Key="EmeraldDarkBrush" Color="{StaticResource EmeraldDark}"/>
+    <SolidColorBrush x:Key="EmeraldLightBrush" Color="{StaticResource EmeraldLight}"/>
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
 

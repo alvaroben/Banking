@@ -3,24 +3,101 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="InternetBankingApp.Views.LoginPage"
              Title="Bienvenido"
-             Shell.NavBarIsVisible="False">
-    <VerticalStackLayout
-        Spacing="25"
-        Padding="30,0"
-        VerticalOptions="Center">
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource Primary}">
 
-        <Label
-            Text="Internet Banking"
-            SemanticProperties.HeadingLevel="Level1"
-            FontSize="32"
-            HorizontalOptions="Center"/>
+    <Grid RowDefinitions="Auto,*">
 
-        <Entry Placeholder="Usuario"/>
-        <Entry Placeholder="Contraseña"
-                IsPassword="True"/>
+        <!-- Encabezado de marca: azul base con acento esmeralda -->
+        <VerticalStackLayout Grid.Row="0"
+                             BackgroundColor="{StaticResource Primary}"
+                             Padding="30,70,30,50"
+                             Spacing="10">
 
-        <Button Text="Iniciar Sesión"
-                HorizontalOptions="Center"/>
+            <BoxView HeightRequest="56"
+                     WidthRequest="56"
+                     Color="{StaticResource Emerald}"
+                     HorizontalOptions="Center">
+                <BoxView.Clip>
+                    <EllipseGeometry Center="28,28" RadiusX="28" RadiusY="28" />
+                </BoxView.Clip>
+            </BoxView>
 
-    </VerticalStackLayout>
+            <Label Text="Internet Banking"
+                   TextColor="{StaticResource White}"
+                   FontFamily="OpenSansSemibold"
+                   FontSize="26"
+                   HorizontalOptions="Center" />
+
+            <Label Text="Tu patrimonio, siempre en crecimiento"
+                   TextColor="{StaticResource EmeraldLight}"
+                   FontSize="14"
+                   HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <!-- Tarjeta de acceso -->
+        <Border Grid.Row="1"
+                BackgroundColor="{StaticResource White}"
+                Stroke="Transparent"
+                Margin="20,-30,20,20"
+                Padding="25,35"
+                VerticalOptions="Start">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="20" />
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="{StaticResource Tertiary}"
+                        Opacity="0.18"
+                        Radius="20"
+                        Offset="0,8" />
+            </Border.Shadow>
+
+            <VerticalStackLayout Spacing="18">
+
+                <Label Text="Iniciar sesión"
+                       TextColor="{StaticResource MidnightBlue}"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="20" />
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Usuario" TextColor="{StaticResource Gray500}" FontSize="13" />
+                    <Border Stroke="{StaticResource Gray200}"
+                            StrokeThickness="1"
+                            Padding="14,0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Entry Placeholder="Ingresa tu usuario"
+                               PlaceholderColor="{StaticResource Gray300}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Contraseña" TextColor="{StaticResource Gray500}" FontSize="13" />
+                    <Border Stroke="{StaticResource Gray200}"
+                            StrokeThickness="1"
+                            Padding="14,0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Entry Placeholder="Ingresa tu contraseña"
+                               PlaceholderColor="{StaticResource Gray300}"
+                               IsPassword="True" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <Label Text="¿Olvidaste tu contraseña?"
+                       TextColor="{StaticResource EmeraldDark}"
+                       FontSize="13"
+                       FontFamily="OpenSansSemibold"
+                       HorizontalOptions="End" />
+
+                <Button Text="Iniciar Sesión"
+                        HorizontalOptions="Fill"
+                        Margin="0,10,0,0" />
+
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
 </ContentPage>
