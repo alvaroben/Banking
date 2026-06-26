@@ -10,6 +10,25 @@
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate views:LoginPage}"
-        Route="LoginPage"/>
+        Route="LoginPage"
+        Shell.FlyoutItemIsVisible="False" />
+
+    <FlyoutItem Title="Cuentas" Route="CuentasPage">
+        <ShellContent ContentTemplate="{DataTemplate views:CuentasPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Préstamos" Route="PrestamosPage">
+        <ShellContent ContentTemplate="{DataTemplate views:PrestamosPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Beneficiarios" Route="BeneficiariosPage">
+        <ShellContent ContentTemplate="{DataTemplate views:BeneficiariosPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Movimientos" Route="MovimientosPage">
+        <ShellContent ContentTemplate="{DataTemplate views:MovimientosPage}" />
+    </FlyoutItem>
+
+    <MenuItem Text="Cerrar sesión" Clicked="OnCerrarSesionClicked" />
 
 </Shell>

@@ -18,6 +18,9 @@
     <Color x:Key="EmeraldDark">#047857</Color>
     <Color x:Key="EmeraldLight">#6EE7B7</Color>
 
+    <!-- Estados de validación -->
+    <Color x:Key="Danger">#DC2626</Color>
+
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
     <Color x:Key="MidnightBlue">#06243B</Color>

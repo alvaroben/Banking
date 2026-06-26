@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:InternetBankingApp.Models"
+             x:Class="InternetBankingApp.Views.CuentasPage"
+             Title="Cuentas">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Button x:Name="ToggleFormButton"
+                    Text="+ Agregar cuenta"
+                    HorizontalOptions="Fill"
+                    Clicked="OnToggleFormClicked" />
+
+            <Border x:Name="FormBorder"
+                    IsVisible="False"
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource Gray200}"
+                    Padding="20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Nueva cuenta" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Número de cuenta" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Entry x:Name="NumeroCuentaEntry" Placeholder="Ej. 1001234567" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Tipo de cuenta" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Picker x:Name="TipoPicker" Title="Selecciona un tipo" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Saldo inicial" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Entry x:Name="SaldoEntry" Placeholder="0.00" Keyboard="Numeric" />
+                    </VerticalStackLayout>
+
+                    <Label x:Name="ErrorLabel" TextColor="{StaticResource Danger}" FontSize="13" IsVisible="False" />
+
+                    <Button Text="Guardar" Clicked="OnGuardarClicked" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="Cuentas registradas" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+
+            <CollectionView x:Name="CuentasList">
+                <CollectionView.EmptyView>
+                    <Label Text="No hay cuentas registradas aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Cuenta">
+                        <Border Stroke="{StaticResource Gray200}" Margin="0,0,0,10" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding NumeroCuenta}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Tipo}" TextColor="{StaticResource Emerald}" FontFamily="OpenSansSemibold" />
+                                <Label Grid.Row="1" Grid.Column="0" Text="{Binding SaldoInicial, StringFormat='Saldo: {0:C2}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding FechaApertura, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray400}" FontSize="13" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -67,7 +67,8 @@
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10" />
                         </Border.StrokeShape>
-                        <Entry Placeholder="Ingresa tu usuario"
+                        <Entry x:Name="UsuarioEntry"
+                               Placeholder="Ingresa tu usuario"
                                PlaceholderColor="{StaticResource Gray300}" />
                     </Border>
                 </VerticalStackLayout>
@@ -80,21 +81,22 @@
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10" />
                         </Border.StrokeShape>
-                        <Entry Placeholder="Ingresa tu contraseña"
+                        <Entry x:Name="ContrasenaEntry"
+                               Placeholder="Ingresa tu contraseña"
                                PlaceholderColor="{StaticResource Gray300}"
                                IsPassword="True" />
                     </Border>
                 </VerticalStackLayout>
 
-                <Label Text="¿Olvidaste tu contraseña?"
-                       TextColor="{StaticResource EmeraldDark}"
+                <Label x:Name="ErrorLabel"
+                       TextColor="{StaticResource Danger}"
                        FontSize="13"
-                       FontFamily="OpenSansSemibold"
-                       HorizontalOptions="End" />
+                       IsVisible="False" />
 
                 <Button Text="Iniciar Sesión"
                         HorizontalOptions="Fill"
-                        Margin="0,10,0,0" />
+                        Margin="0,10,0,0"
+                        Clicked="OnIniciarSesionClicked" />
 
             </VerticalStackLayout>
         </Border>

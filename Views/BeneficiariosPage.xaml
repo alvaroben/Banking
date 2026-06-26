@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:InternetBankingApp.Models"
+             x:Class="InternetBankingApp.Views.BeneficiariosPage"
+             Title="Beneficiarios">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Button x:Name="ToggleFormButton"
+                    Text="+ Agregar beneficiario"
+                    HorizontalOptions="Fill"
+                    Clicked="OnToggleFormClicked" />
+
+            <Border x:Name="FormBorder"
+                    IsVisible="False"
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource Gray200}"
+                    Padding="20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Nuevo beneficiario" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Nombre" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Entry x:Name="NombreEntry" Placeholder="Ej. Juan Pérez" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Número de cuenta" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Entry x:Name="NumeroCuentaEntry" Placeholder="Ej. 2002345678" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Banco" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Entry x:Name="BancoEntry" Placeholder="Ej. Banco Nacional" />
+                    </VerticalStackLayout>
+
+                    <Label x:Name="ErrorLabel" TextColor="{StaticResource Danger}" FontSize="13" IsVisible="False" />
+
+                    <Button Text="Guardar" Clicked="OnGuardarClicked" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="Beneficiarios registrados" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+
+            <CollectionView x:Name="BeneficiariosList">
+                <CollectionView.EmptyView>
+                    <Label Text="No hay beneficiarios registrados aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Beneficiario">
+                        <Border Stroke="{StaticResource Gray200}" Margin="0,0,0,10" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding Nombre}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Banco}" TextColor="{StaticResource Emerald}" FontFamily="OpenSansSemibold" />
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding NumeroCuenta, StringFormat='Cuenta: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
