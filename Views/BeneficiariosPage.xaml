@@ -60,7 +60,7 @@
                             </Border.StrokeShape>
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                 <Label Grid.Row="0" Grid.Column="0" Text="{Binding Nombre}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
-                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Banco}" TextColor="{StaticResource Emerald}" FontFamily="OpenSansSemibold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Banco}" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" />
                                 <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding NumeroCuenta, StringFormat='Cuenta: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
                             </Grid>
                         </Border>

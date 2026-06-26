@@ -26,6 +26,11 @@
     <Color x:Key="MidnightBlue">#06243B</Color>
     <Color x:Key="OffBlack">#10202B</Color>
 
+    <!-- Fondo de página: fijo y claro a propósito (con un toque de menta de marca), para que el
+         contraste con MidnightBlue/Emerald se mantenga sin importar el tema del sistema operativo
+         (esta app no tiene variante oscura). -->
+    <Color x:Key="Background">#EAF5F0</Color>
+
     <Color x:Key="Gray100">#E1E1E1</Color>
     <Color x:Key="Gray200">#C8C8C8</Color>
     <Color x:Key="Gray300">#ACACAC</Color>

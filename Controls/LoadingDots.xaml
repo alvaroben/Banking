@@ -4,9 +4,9 @@
              x:Class="InternetBankingApp.Controls.LoadingDots">
 
     <HorizontalStackLayout Spacing="6" HorizontalOptions="Center">
-        <Ellipse x:Name="Dot1" WidthRequest="10" HeightRequest="10" Fill="{StaticResource Emerald}" />
-        <Ellipse x:Name="Dot2" WidthRequest="10" HeightRequest="10" Fill="{StaticResource Emerald}" />
-        <Ellipse x:Name="Dot3" WidthRequest="10" HeightRequest="10" Fill="{StaticResource Emerald}" />
+        <Ellipse x:Name="Dot1" WidthRequest="10" HeightRequest="10" Fill="{StaticResource EmeraldDark}" />
+        <Ellipse x:Name="Dot2" WidthRequest="10" HeightRequest="10" Fill="{StaticResource EmeraldDark}" />
+        <Ellipse x:Name="Dot3" WidthRequest="10" HeightRequest="10" Fill="{StaticResource EmeraldDark}" />
     </HorizontalStackLayout>
 
 </ContentView>

@@ -27,11 +27,6 @@
                     <Label Text="Solicitud de apertura de cuenta" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
 
                     <VerticalStackLayout Spacing="4">
-                        <Label Text="Número de cuenta" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry x:Name="NumeroCuentaEntry" Placeholder="Ej. 1001234567" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="4">
                         <Label Text="Tipo de cuenta" TextColor="{StaticResource Gray500}" FontSize="13" />
                         <Picker x:Name="TipoPicker" Title="Selecciona un tipo" />
                     </VerticalStackLayout>
@@ -52,11 +47,11 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Label Text="Cuentas aprobadas" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+            <Label Text="Tus Cuentas" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
 
             <CollectionView x:Name="CuentasList">
                 <CollectionView.EmptyView>
-                    <Label Text="No hay cuentas aprobadas aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
+                    <Label Text="No hay cuentas aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
                 </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Cuenta">
@@ -66,7 +61,7 @@
                             </Border.StrokeShape>
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                 <Label Grid.Row="0" Grid.Column="0" Text="{Binding NumeroCuenta}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
-                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Tipo}" TextColor="{StaticResource Emerald}" FontFamily="OpenSansSemibold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Tipo}" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" />
                                 <Label Grid.Row="1" Grid.Column="0" Text="{Binding Saldo, StringFormat='Saldo: {0:C2}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
                                 <Label Grid.Row="1" Grid.Column="1" Text="{Binding FechaApertura, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray400}" FontSize="13" />
                             </Grid>

@@ -71,7 +71,7 @@
                             </Border.StrokeShape>
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
                                 <Label Grid.Row="0" Grid.Column="0" Text="{Binding Concepto}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
-                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Monto, StringFormat='{0:C2}'}" TextColor="{StaticResource Emerald}" FontFamily="OpenSansSemibold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Monto, StringFormat='{0:C2}'}" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" />
                                 <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding CuentaOrigen, StringFormat='Desde cuenta: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
                                 <Label Grid.Row="2" Grid.Column="0" Text="{Binding BeneficiarioDestino, StringFormat='Para: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
                                 <Label Grid.Row="2" Grid.Column="1" Text="{Binding Fecha, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray400}" FontSize="13" />

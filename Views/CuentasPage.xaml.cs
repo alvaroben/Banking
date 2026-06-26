@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using InternetBankingApp.Models;
 using InternetBankingApp.Services;
 
@@ -7,6 +8,7 @@ namespace InternetBankingApp.Views;
 public partial class CuentasPage : ContentPage
 {
     private readonly BankingDataService _dataService;
+    private static readonly Random Random = new();
 
     public CuentasPage(BankingDataService dataService)
     {
@@ -24,10 +26,9 @@ public partial class CuentasPage : ContentPage
 
     private async void OnSolicitarClicked(object? sender, EventArgs e)
     {
-        var numeroCuenta = NumeroCuentaEntry.Text?.Trim() ?? string.Empty;
         var saldoTexto = SaldoEntry.Text?.Trim() ?? string.Empty;
 
-        if (string.IsNullOrEmpty(numeroCuenta) || TipoPicker.SelectedIndex == -1 || string.IsNullOrEmpty(saldoTexto))
+        if (TipoPicker.SelectedIndex == -1 || string.IsNullOrEmpty(saldoTexto))
         {
             MostrarError("Todos los campos son obligatorios.");
             return;
@@ -55,18 +56,30 @@ public partial class CuentasPage : ContentPage
 
         var cuenta = new Cuenta
         {
-            NumeroCuenta = numeroCuenta,
+            NumeroCuenta = GenerarNumeroCuenta(),
             Tipo = Enum.Parse<TipoCuenta>((string)TipoPicker.SelectedItem),
             Saldo = saldo
         };
 
         _dataService.AgregarCuenta(cuenta);
 
-        NumeroCuentaEntry.Text = string.Empty;
         SaldoEntry.Text = string.Empty;
         TipoPicker.SelectedIndex = -1;
         FormBorder.IsVisible = false;
         ToggleFormButton.Text = "+ Solicitar cuenta";
+
+        await DisplayAlertAsync("Cuenta aprobada", $"Tu nueva cuenta {cuenta.NumeroCuenta} ha sido creada.", "Aceptar");
+    }
+
+    private string GenerarNumeroCuenta()
+    {
+        string numero;
+        do
+        {
+            numero = $"10{Random.Next(0, 100_000_000):D8}";
+        } while (_dataService.Cuentas.Any(c => c.NumeroCuenta == numero));
+
+        return numero;
     }
 
     private void MostrarError(string mensaje)

@@ -7,28 +7,69 @@
     Shell.FlyoutBehavior="Disabled"
     Title="InternetBankingApp">
 
+    <!-- Plantilla explícita para los ítems del flyout: el color de texto por defecto del Shell
+         (Shell.UnselectedColor/ForegroundColor) no siempre se respeta en todas las plataformas,
+         así que aquí fijamos el color directamente para garantizar buen contraste sobre el navy.
+         El estado "Selected" resalta la página activa con fondo y texto más claros. -->
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid Padding="20,14">
+                <Label x:Name="ItemLabel"
+                       Text="{Binding Title}"
+                       TextColor="{StaticResource Gray200}"
+                       FontSize="16"
+                       VerticalOptions="Center" />
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal" />
+                            <VisualState x:Name="Selected">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource PrimaryDark}" />
+                                    <Setter TargetName="ItemLabel" Property="Label.TextColor" Value="{StaticResource White}" />
+                                    <Setter TargetName="ItemLabel" Property="Label.FontFamily" Value="OpenSansSemibold" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    <Shell.MenuItemTemplate>
+        <DataTemplate>
+            <Grid Padding="20,14">
+                <Label Text="{Binding Text}"
+                       TextColor="{StaticResource Gray200}"
+                       FontSize="16"
+                       VerticalOptions="Center" />
+            </Grid>
+        </DataTemplate>
+    </Shell.MenuItemTemplate>
+
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate views:LoginPage}"
         Route="LoginPage"
         Shell.FlyoutItemIsVisible="False" />
 
-    <FlyoutItem Title="Cuentas" Route="CuentasPage">
+    <FlyoutItem Title="🏦  Cuentas" Route="CuentasPage">
         <ShellContent ContentTemplate="{DataTemplate views:CuentasPage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Préstamos" Route="PrestamosPage">
+    <FlyoutItem Title="💰  Préstamos" Route="PrestamosPage">
         <ShellContent ContentTemplate="{DataTemplate views:PrestamosPage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Beneficiarios" Route="BeneficiariosPage">
+    <FlyoutItem Title="👥  Beneficiarios" Route="BeneficiariosPage">
         <ShellContent ContentTemplate="{DataTemplate views:BeneficiariosPage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Transferencias" Route="TransferenciasPage">
+    <FlyoutItem Title="🔁  Transferencias" Route="TransferenciasPage">
         <ShellContent ContentTemplate="{DataTemplate views:TransferenciasPage}" />
     </FlyoutItem>
 
-    <MenuItem Text="Cerrar sesión" Clicked="OnCerrarSesionClicked" />
+    <MenuItem Text="🚪  Cerrar sesión" Clicked="OnCerrarSesionClicked" />
 
 </Shell>
