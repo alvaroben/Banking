@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:InternetBankingApp.Models"
+             x:Class="InternetBankingApp.Views.TransferenciasPage"
+             Title="Transferencias">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label x:Name="RequisitoLabel"
+                   Text="Necesitas al menos una cuenta y un beneficiario registrados para poder transferir."
+                   TextColor="{StaticResource Danger}"
+                   FontSize="13"
+                   IsVisible="False" />
+
+            <Button x:Name="ToggleFormButton"
+                    Text="+ Agregar transferencia"
+                    HorizontalOptions="Fill"
+                    Clicked="OnToggleFormClicked" />
+
+            <Border x:Name="FormBorder"
+                    IsVisible="False"
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource Gray200}"
+                    Padding="20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Nueva transferencia" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Cuenta origen" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Picker x:Name="CuentaPicker" Title="Selecciona una cuenta" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Beneficiario destino" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Picker x:Name="BeneficiarioPicker" Title="Selecciona un beneficiario" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Concepto" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Entry x:Name="ConceptoEntry" Placeholder="Ej. Pago de servicios" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Monto" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Entry x:Name="MontoEntry" Placeholder="0.00" Keyboard="Numeric" />
+                    </VerticalStackLayout>
+
+                    <Label x:Name="ErrorLabel" TextColor="{StaticResource Danger}" FontSize="13" IsVisible="False" />
+
+                    <Button Text="Transferir" Clicked="OnGuardarClicked" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="Transferencias registradas" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+
+            <CollectionView x:Name="TransferenciasList">
+                <CollectionView.EmptyView>
+                    <Label Text="No hay transferencias registradas aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Transferencia">
+                        <Border Stroke="{StaticResource Gray200}" Margin="0,0,0,10" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding Concepto}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Monto, StringFormat='{0:C2}'}" TextColor="{StaticResource Emerald}" FontFamily="OpenSansSemibold" />
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding CuentaOrigen, StringFormat='Desde cuenta: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
+                                <Label Grid.Row="2" Grid.Column="0" Text="{Binding BeneficiarioDestino, StringFormat='Para: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
+                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Fecha, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray400}" FontSize="13" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

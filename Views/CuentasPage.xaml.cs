@@ -19,10 +19,10 @@ public partial class CuentasPage : ContentPage
     private void OnToggleFormClicked(object? sender, EventArgs e)
     {
         FormBorder.IsVisible = !FormBorder.IsVisible;
-        ToggleFormButton.Text = FormBorder.IsVisible ? "Cancelar" : "+ Agregar cuenta";
+        ToggleFormButton.Text = FormBorder.IsVisible ? "Cancelar" : "+ Solicitar cuenta";
     }
 
-    private void OnGuardarClicked(object? sender, EventArgs e)
+    private async void OnSolicitarClicked(object? sender, EventArgs e)
     {
         var numeroCuenta = NumeroCuentaEntry.Text?.Trim() ?? string.Empty;
         var saldoTexto = SaldoEntry.Text?.Trim() ?? string.Empty;
@@ -39,11 +39,25 @@ public partial class CuentasPage : ContentPage
             return;
         }
 
+        ErrorLabel.IsVisible = false;
+
+        FormFieldsLayout.IsEnabled = false;
+        SolicitarButton.IsVisible = false;
+        LoadingPanel.IsVisible = true;
+        LoadingIndicator.Start();
+
+        await Task.Delay(3000);
+
+        LoadingIndicator.Stop();
+        LoadingPanel.IsVisible = false;
+        SolicitarButton.IsVisible = true;
+        FormFieldsLayout.IsEnabled = true;
+
         var cuenta = new Cuenta
         {
             NumeroCuenta = numeroCuenta,
             Tipo = Enum.Parse<TipoCuenta>((string)TipoPicker.SelectedItem),
-            SaldoInicial = saldo
+            Saldo = saldo
         };
 
         _dataService.AgregarCuenta(cuenta);
@@ -51,9 +65,8 @@ public partial class CuentasPage : ContentPage
         NumeroCuentaEntry.Text = string.Empty;
         SaldoEntry.Text = string.Empty;
         TipoPicker.SelectedIndex = -1;
-        ErrorLabel.IsVisible = false;
         FormBorder.IsVisible = false;
-        ToggleFormButton.Text = "+ Agregar cuenta";
+        ToggleFormButton.Text = "+ Solicitar cuenta";
     }
 
     private void MostrarError(string mensaje)

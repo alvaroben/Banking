@@ -25,7 +25,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<CuentasPage>();
 		builder.Services.AddTransient<PrestamosPage>();
 		builder.Services.AddTransient<BeneficiariosPage>();
-		builder.Services.AddTransient<MovimientosPage>();
+		builder.Services.AddTransient<TransferenciasPage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

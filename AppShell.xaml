@@ -25,8 +25,8 @@
         <ShellContent ContentTemplate="{DataTemplate views:BeneficiariosPage}" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Movimientos" Route="MovimientosPage">
-        <ShellContent ContentTemplate="{DataTemplate views:MovimientosPage}" />
+    <FlyoutItem Title="Transferencias" Route="TransferenciasPage">
+        <ShellContent ContentTemplate="{DataTemplate views:TransferenciasPage}" />
     </FlyoutItem>
 
     <MenuItem Text="Cerrar sesión" Clicked="OnCerrarSesionClicked" />

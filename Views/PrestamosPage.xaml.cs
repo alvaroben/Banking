@@ -18,10 +18,10 @@ public partial class PrestamosPage : ContentPage
     private void OnToggleFormClicked(object? sender, EventArgs e)
     {
         FormBorder.IsVisible = !FormBorder.IsVisible;
-        ToggleFormButton.Text = FormBorder.IsVisible ? "Cancelar" : "+ Agregar préstamo";
+        ToggleFormButton.Text = FormBorder.IsVisible ? "Cancelar" : "+ Solicitar préstamo";
     }
 
-    private void OnGuardarClicked(object? sender, EventArgs e)
+    private async void OnSolicitarClicked(object? sender, EventArgs e)
     {
         var producto = ProductoEntry.Text?.Trim() ?? string.Empty;
         var montoTexto = MontoEntry.Text?.Trim() ?? string.Empty;
@@ -45,6 +45,20 @@ public partial class PrestamosPage : ContentPage
             return;
         }
 
+        ErrorLabel.IsVisible = false;
+
+        FormFieldsLayout.IsEnabled = false;
+        SolicitarButton.IsVisible = false;
+        LoadingPanel.IsVisible = true;
+        LoadingIndicator.Start();
+
+        await Task.Delay(3000);
+
+        LoadingIndicator.Stop();
+        LoadingPanel.IsVisible = false;
+        SolicitarButton.IsVisible = true;
+        FormFieldsLayout.IsEnabled = true;
+
         var prestamo = new Prestamo
         {
             Producto = producto,
@@ -57,9 +71,8 @@ public partial class PrestamosPage : ContentPage
         ProductoEntry.Text = string.Empty;
         MontoEntry.Text = string.Empty;
         PlazoEntry.Text = string.Empty;
-        ErrorLabel.IsVisible = false;
         FormBorder.IsVisible = false;
-        ToggleFormButton.Text = "+ Agregar préstamo";
+        ToggleFormButton.Text = "+ Solicitar préstamo";
     }
 
     private void MostrarError(string mensaje)
