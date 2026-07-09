@@ -1,83 +1,34 @@
-using System.Globalization;
-using InternetBankingApp.Models;
-using InternetBankingApp.Services;
+using System.ComponentModel;
+using InternetBankingApp.ViewModels;
 
 namespace InternetBankingApp.Views;
 
 public partial class PrestamosPage : ContentPage
 {
-    private readonly BankingDataService _dataService;
+    private readonly PrestamosViewModel _viewModel;
 
-    public PrestamosPage(BankingDataService dataService)
+    public PrestamosPage(PrestamosViewModel viewModel)
     {
         InitializeComponent();
-        _dataService = dataService;
-        PrestamosList.ItemsSource = _dataService.Prestamos;
+        _viewModel = viewModel;
+        BindingContext = viewModel;
+        _viewModel.PropertyChanged += OnViewModelPropertyChanged;
     }
 
-    private void OnToggleFormClicked(object? sender, EventArgs e)
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        FormBorder.IsVisible = !FormBorder.IsVisible;
-        ToggleFormButton.Text = FormBorder.IsVisible ? "Cancelar" : "+ Solicitar préstamo";
-    }
-
-    private async void OnSolicitarClicked(object? sender, EventArgs e)
-    {
-        var producto = ProductoEntry.Text?.Trim() ?? string.Empty;
-        var montoTexto = MontoEntry.Text?.Trim() ?? string.Empty;
-        var plazoTexto = PlazoEntry.Text?.Trim() ?? string.Empty;
-
-        if (string.IsNullOrEmpty(producto) || string.IsNullOrEmpty(montoTexto) || string.IsNullOrEmpty(plazoTexto))
+        if (e.PropertyName != nameof(PrestamosViewModel.IsBusy))
         {
-            MostrarError("Todos los campos son obligatorios.");
             return;
         }
 
-        if (!decimal.TryParse(montoTexto, NumberStyles.Number, CultureInfo.InvariantCulture, out var monto) || monto <= 0)
+        if (_viewModel.IsBusy)
         {
-            MostrarError("El monto solicitado debe ser un número válido.");
-            return;
+            LoadingIndicator.Start();
         }
-
-        if (!int.TryParse(plazoTexto, out var plazo) || plazo <= 0)
+        else
         {
-            MostrarError("El plazo debe ser un número entero válido.");
-            return;
+            LoadingIndicator.Stop();
         }
-
-        ErrorLabel.IsVisible = false;
-
-        FormFieldsLayout.IsEnabled = false;
-        SolicitarButton.IsVisible = false;
-        LoadingPanel.IsVisible = true;
-        LoadingIndicator.Start();
-
-        await Task.Delay(3000);
-
-        LoadingIndicator.Stop();
-        LoadingPanel.IsVisible = false;
-        SolicitarButton.IsVisible = true;
-        FormFieldsLayout.IsEnabled = true;
-
-        var prestamo = new Prestamo
-        {
-            Producto = producto,
-            MontoSolicitado = monto,
-            PlazoMeses = plazo
-        };
-
-        _dataService.AgregarPrestamo(prestamo);
-
-        ProductoEntry.Text = string.Empty;
-        MontoEntry.Text = string.Empty;
-        PlazoEntry.Text = string.Empty;
-        FormBorder.IsVisible = false;
-        ToggleFormButton.Text = "+ Solicitar préstamo";
-    }
-
-    private void MostrarError(string mensaje)
-    {
-        ErrorLabel.Text = mensaje;
-        ErrorLabel.IsVisible = true;
     }
 }

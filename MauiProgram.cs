@@ -1,4 +1,5 @@
 ﻿using InternetBankingApp.Services;
+using InternetBankingApp.ViewModels;
 using InternetBankingApp.Views;
 using Microsoft.Extensions.Logging;
 
@@ -21,10 +22,20 @@ public static class MauiProgram
 		builder.Services.AddSingleton<BankingDataService>();
 
 		builder.Services.AddSingleton<AppShell>();
+
+		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<LoginPage>();
+
+		builder.Services.AddTransient<CuentasViewModel>();
 		builder.Services.AddTransient<CuentasPage>();
+
+		builder.Services.AddTransient<PrestamosViewModel>();
 		builder.Services.AddTransient<PrestamosPage>();
+
+		builder.Services.AddTransient<BeneficiariosViewModel>();
 		builder.Services.AddTransient<BeneficiariosPage>();
+
+		builder.Services.AddTransient<TransferenciasViewModel>();
 		builder.Services.AddTransient<TransferenciasPage>();
 
 #if DEBUG

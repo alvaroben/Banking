@@ -2,19 +2,19 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:InternetBankingApp.Models"
+             xmlns:vm="clr-namespace:InternetBankingApp.ViewModels"
              x:Class="InternetBankingApp.Views.BeneficiariosPage"
+             x:DataType="vm:BeneficiariosViewModel"
              Title="Beneficiarios">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
 
-            <Button x:Name="ToggleFormButton"
-                    Text="+ Agregar beneficiario"
+            <Button Text="{Binding ToggleButtonText}"
                     HorizontalOptions="Fill"
-                    Clicked="OnToggleFormClicked" />
+                    Command="{Binding ToggleFormCommand}" />
 
-            <Border x:Name="FormBorder"
-                    IsVisible="False"
+            <Border IsVisible="{Binding IsFormVisible}"
                     BackgroundColor="{StaticResource White}"
                     Stroke="{StaticResource Gray200}"
                     Padding="20">
@@ -27,28 +27,38 @@
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Nombre" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry x:Name="NombreEntry" Placeholder="Ej. Juan Pérez" />
+                        <Entry Text="{Binding Nombre}" Placeholder="Ej. Juan Pérez" />
+                        <Label Text="{Binding NombreError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding NombreError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Número de cuenta" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry x:Name="NumeroCuentaEntry" Placeholder="Ej. 2002345678" />
+                        <Entry Text="{Binding NumeroCuenta}" Placeholder="Ej. 2002345678" Keyboard="Numeric" />
+                        <Label Text="{Binding NumeroCuentaError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding NumeroCuentaError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Banco" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry x:Name="BancoEntry" Placeholder="Ej. Banco Nacional" />
+                        <Entry Text="{Binding Banco}" Placeholder="Ej. Banco Nacional" />
+                        <Label Text="{Binding BancoError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding BancoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
-                    <Label x:Name="ErrorLabel" TextColor="{StaticResource Danger}" FontSize="13" IsVisible="False" />
-
-                    <Button Text="Guardar" Clicked="OnGuardarClicked" />
+                    <Button Text="Guardar" Command="{Binding GuardarCommand}" />
                 </VerticalStackLayout>
             </Border>
 
             <Label Text="Beneficiarios registrados" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
 
-            <CollectionView x:Name="BeneficiariosList">
+            <CollectionView ItemsSource="{Binding Beneficiarios}">
                 <CollectionView.EmptyView>
                     <Label Text="No hay beneficiarios registrados aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
                 </CollectionView.EmptyView>

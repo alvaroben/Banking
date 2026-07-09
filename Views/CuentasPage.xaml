@@ -3,19 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:InternetBankingApp.Models"
              xmlns:controls="clr-namespace:InternetBankingApp.Controls"
+             xmlns:vm="clr-namespace:InternetBankingApp.ViewModels"
              x:Class="InternetBankingApp.Views.CuentasPage"
+             x:DataType="vm:CuentasViewModel"
              Title="Cuentas">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
 
-            <Button x:Name="ToggleFormButton"
-                    Text="+ Solicitar cuenta"
+            <Button Text="{Binding ToggleButtonText}"
                     HorizontalOptions="Fill"
-                    Clicked="OnToggleFormClicked" />
+                    Command="{Binding ToggleFormCommand}" />
 
-            <Border x:Name="FormBorder"
-                    IsVisible="False"
+            <Border IsVisible="{Binding IsFormVisible}"
                     BackgroundColor="{StaticResource White}"
                     Stroke="{StaticResource Gray200}"
                     Padding="20">
@@ -23,24 +23,32 @@
                     <RoundRectangle CornerRadius="14" />
                 </Border.StrokeShape>
 
-                <VerticalStackLayout x:Name="FormFieldsLayout" Spacing="12">
+                <VerticalStackLayout Spacing="12" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}">
                     <Label Text="Solicitud de apertura de cuenta" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Tipo de cuenta" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Picker x:Name="TipoPicker" Title="Selecciona un tipo" />
+                        <Picker Title="Selecciona un tipo" ItemsSource="{Binding TiposCuenta}" SelectedItem="{Binding TipoSeleccionado}" />
+                        <Label Text="{Binding TipoError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding TipoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Saldo inicial" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry x:Name="SaldoEntry" Placeholder="0.00" Keyboard="Numeric" />
+                        <Entry Text="{Binding Saldo}" Placeholder="0.00" Keyboard="Numeric" />
+                        <Label Text="{Binding SaldoError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding SaldoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
-                    <Label x:Name="ErrorLabel" TextColor="{StaticResource Danger}" FontSize="13" IsVisible="False" />
+                    <Button Text="Solicitar cuenta"
+                            Command="{Binding SolicitarCommand}"
+                            IsVisible="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
 
-                    <Button x:Name="SolicitarButton" Text="Solicitar cuenta" Clicked="OnSolicitarClicked" />
-
-                    <VerticalStackLayout x:Name="LoadingPanel" IsVisible="False" Spacing="8" Margin="0,4,0,0">
+                    <VerticalStackLayout IsVisible="{Binding IsBusy}" Spacing="8" Margin="0,4,0,0">
                         <controls:LoadingDots x:Name="LoadingIndicator" HeightRequest="20" />
                         <Label Text="Esperando autorización del banco..." TextColor="{StaticResource Gray500}" FontSize="13" HorizontalOptions="Center" />
                     </VerticalStackLayout>
@@ -49,7 +57,7 @@
 
             <Label Text="Tus Cuentas" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
 
-            <CollectionView x:Name="CuentasList">
+            <CollectionView ItemsSource="{Binding Cuentas}">
                 <CollectionView.EmptyView>
                     <Label Text="No hay cuentas aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
                 </CollectionView.EmptyView>

@@ -2,25 +2,25 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:InternetBankingApp.Models"
+             xmlns:vm="clr-namespace:InternetBankingApp.ViewModels"
              x:Class="InternetBankingApp.Views.TransferenciasPage"
+             x:DataType="vm:TransferenciasViewModel"
              Title="Transferencias">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
 
-            <Label x:Name="RequisitoLabel"
-                   Text="Necesitas al menos una cuenta y un beneficiario registrados para poder transferir."
+            <Label Text="Necesitas al menos una cuenta y un beneficiario registrados para poder transferir."
                    TextColor="{StaticResource Danger}"
                    FontSize="13"
-                   IsVisible="False" />
+                   IsVisible="{Binding RequisitoVisible}" />
 
-            <Button x:Name="ToggleFormButton"
-                    Text="+ Agregar transferencia"
+            <Button Text="{Binding ToggleButtonText}"
                     HorizontalOptions="Fill"
-                    Clicked="OnToggleFormClicked" />
+                    IsEnabled="{Binding PuedeTransferir}"
+                    Command="{Binding ToggleFormCommand}" />
 
-            <Border x:Name="FormBorder"
-                    IsVisible="False"
+            <Border IsVisible="{Binding IsFormVisible}"
                     BackgroundColor="{StaticResource White}"
                     Stroke="{StaticResource Gray200}"
                     Padding="20">
@@ -33,33 +33,51 @@
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Cuenta origen" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Picker x:Name="CuentaPicker" Title="Selecciona una cuenta" />
+                        <Picker x:Name="CuentaPicker" Title="Selecciona una cuenta"
+                                ItemsSource="{Binding Cuentas}"
+                                SelectedItem="{Binding CuentaOrigenSeleccionada}" />
+                        <Label Text="{Binding CuentaOrigenError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding CuentaOrigenError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Beneficiario destino" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Picker x:Name="BeneficiarioPicker" Title="Selecciona un beneficiario" />
+                        <Picker x:Name="BeneficiarioPicker" Title="Selecciona un beneficiario"
+                                ItemsSource="{Binding Beneficiarios}"
+                                SelectedItem="{Binding BeneficiarioDestinoSeleccionado}" />
+                        <Label Text="{Binding BeneficiarioDestinoError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding BeneficiarioDestinoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Concepto" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry x:Name="ConceptoEntry" Placeholder="Ej. Pago de servicios" />
+                        <Entry Text="{Binding Concepto}" Placeholder="Ej. Pago de servicios" />
+                        <Label Text="{Binding ConceptoError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding ConceptoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Monto" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry x:Name="MontoEntry" Placeholder="0.00" Keyboard="Numeric" />
+                        <Entry Text="{Binding Monto}" Placeholder="0.00" Keyboard="Numeric" />
+                        <Label Text="{Binding MontoError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding MontoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
-                    <Label x:Name="ErrorLabel" TextColor="{StaticResource Danger}" FontSize="13" IsVisible="False" />
-
-                    <Button Text="Transferir" Clicked="OnGuardarClicked" />
+                    <Button Text="Transferir" Command="{Binding GuardarCommand}" />
                 </VerticalStackLayout>
             </Border>
 
             <Label Text="Transferencias registradas" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
 
-            <CollectionView x:Name="TransferenciasList">
+            <CollectionView ItemsSource="{Binding Transferencias}">
                 <CollectionView.EmptyView>
                     <Label Text="No hay transferencias registradas aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
                 </CollectionView.EmptyView>

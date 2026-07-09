@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:InternetBankingApp.ViewModels"
              x:Class="InternetBankingApp.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
              Title="Bienvenido"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource Primary}">
@@ -67,10 +69,14 @@
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10" />
                         </Border.StrokeShape>
-                        <Entry x:Name="UsuarioEntry"
+                        <Entry Text="{Binding Usuario}"
                                Placeholder="Ingresa tu usuario"
                                PlaceholderColor="{StaticResource Gray300}" />
                     </Border>
+                    <Label Text="{Binding UsuarioError}"
+                           TextColor="{StaticResource Danger}"
+                           FontSize="12"
+                           IsVisible="{Binding UsuarioError, Converter={StaticResource StringNotEmptyConverter}}" />
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="6">
@@ -81,22 +87,26 @@
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10" />
                         </Border.StrokeShape>
-                        <Entry x:Name="ContrasenaEntry"
+                        <Entry Text="{Binding Contrasena}"
                                Placeholder="Ingresa tu contraseña"
                                PlaceholderColor="{StaticResource Gray300}"
                                IsPassword="True" />
                     </Border>
+                    <Label Text="{Binding ContrasenaError}"
+                           TextColor="{StaticResource Danger}"
+                           FontSize="12"
+                           IsVisible="{Binding ContrasenaError, Converter={StaticResource StringNotEmptyConverter}}" />
                 </VerticalStackLayout>
 
-                <Label x:Name="ErrorLabel"
+                <Label Text="{Binding ErrorMensaje}"
                        TextColor="{StaticResource Danger}"
                        FontSize="13"
-                       IsVisible="False" />
+                       IsVisible="{Binding ErrorMensaje, Converter={StaticResource StringNotEmptyConverter}}" />
 
                 <Button Text="Iniciar Sesión"
                         HorizontalOptions="Fill"
                         Margin="0,10,0,0"
-                        Clicked="OnIniciarSesionClicked" />
+                        Command="{Binding IniciarSesionCommand}" />
 
             </VerticalStackLayout>
         </Border>
