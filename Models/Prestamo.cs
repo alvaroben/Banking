@@ -1,10 +1,20 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace InternetBankingApp.Models;
 
-public class Prestamo
+public partial class Prestamo : ObservableObject
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string Producto { get; set; } = string.Empty;
-    public decimal MontoSolicitado { get; set; }
-    public int PlazoMeses { get; set; }
-    public DateTime FechaSolicitud { get; set; } = DateTime.Now;
+
+    [ObservableProperty]
+    private string producto = string.Empty;
+
+    [ObservableProperty]
+    private decimal montoSolicitado;
+
+    [ObservableProperty]
+    private int plazoMeses;
+
+    [ObservableProperty]
+    private DateTime fechaSolicitud = DateTime.Now;
 }

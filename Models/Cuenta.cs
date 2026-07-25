@@ -1,4 +1,4 @@
-using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace InternetBankingApp.Models;
 
@@ -8,28 +8,19 @@ public enum TipoCuenta
     Corriente
 }
 
-public class Cuenta : INotifyPropertyChanged
+public partial class Cuenta : ObservableObject
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string NumeroCuenta { get; set; } = string.Empty;
-    public TipoCuenta Tipo { get; set; }
-    public DateTime FechaApertura { get; set; } = DateTime.Now;
 
-    private decimal _saldo;
-    public decimal Saldo
-    {
-        get => _saldo;
-        set
-        {
-            if (_saldo == value)
-            {
-                return;
-            }
+    [ObservableProperty]
+    private string numeroCuenta = string.Empty;
 
-            _saldo = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Saldo)));
-        }
-    }
+    [ObservableProperty]
+    private TipoCuenta tipo;
+
+    [ObservableProperty]
+    private DateTime fechaApertura = DateTime.Now;
+
+    [ObservableProperty]
+    private decimal saldo;
 }

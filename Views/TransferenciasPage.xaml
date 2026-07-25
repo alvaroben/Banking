@@ -4,6 +4,7 @@
              xmlns:models="clr-namespace:InternetBankingApp.Models"
              xmlns:vm="clr-namespace:InternetBankingApp.ViewModels"
              x:Class="InternetBankingApp.Views.TransferenciasPage"
+             x:Name="PageRoot"
              x:DataType="vm:TransferenciasViewModel"
              Title="Transferencias">
 
@@ -29,7 +30,7 @@
                 </Border.StrokeShape>
 
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="Nueva transferencia" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+                    <Label Text="{Binding FormTitle}" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Cuenta origen" TextColor="{StaticResource Gray500}" FontSize="13" />
@@ -71,7 +72,13 @@
                                IsVisible="{Binding MontoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
-                    <Button Text="Transferir" Command="{Binding GuardarCommand}" />
+                    <Button Text="{Binding GuardarButtonText}" Command="{Binding GuardarCommand}" />
+
+                    <Button Text="Eliminar transferencia"
+                            Style="{StaticResource DangerButtonStyle}"
+                            Command="{Binding EliminarCommand}"
+                            CommandParameter="{Binding TransferenciaEnEdicion}"
+                            IsVisible="{Binding IsEditMode}" />
                 </VerticalStackLayout>
             </Border>
 
@@ -87,12 +94,21 @@
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="12" />
                             </Border.StrokeShape>
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding BindingContext.EditarCommand, Source={x:Reference PageRoot}}" CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto,Auto">
                                 <Label Grid.Row="0" Grid.Column="0" Text="{Binding Concepto}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
-                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Monto, StringFormat='{0:C2}'}" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Monto, StringFormat='{0:C2}'}" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
                                 <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding CuentaOrigen, StringFormat='Desde cuenta: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
                                 <Label Grid.Row="2" Grid.Column="0" Text="{Binding BeneficiarioDestino, StringFormat='Para: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
                                 <Label Grid.Row="2" Grid.Column="1" Text="{Binding Fecha, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray400}" FontSize="13" />
+                                <Button Grid.Row="0" Grid.RowSpan="3" Grid.Column="2"
+                                        Style="{StaticResource DeleteIconButtonStyle}"
+                                        VerticalOptions="Center"
+                                        Margin="10,0,0,0"
+                                        Command="{Binding BindingContext.EliminarCommand, Source={x:Reference PageRoot}}"
+                                        CommandParameter="{Binding .}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

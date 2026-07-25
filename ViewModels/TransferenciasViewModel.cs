@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InternetBankingApp.Models;
@@ -28,6 +29,18 @@ public partial class TransferenciasViewModel : ObservableObject
     private bool isFormVisible;
 
     public string ToggleButtonText => IsFormVisible ? "Cancelar" : "+ Agregar transferencia";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditMode))]
+    [NotifyPropertyChangedFor(nameof(FormTitle))]
+    [NotifyPropertyChangedFor(nameof(GuardarButtonText))]
+    private Transferencia? transferenciaEnEdicion;
+
+    public bool IsEditMode => TransferenciaEnEdicion is not null;
+
+    public string FormTitle => IsEditMode ? "Editar transferencia" : "Nueva transferencia";
+
+    public string GuardarButtonText => IsEditMode ? "Guardar cambios" : "Transferir";
 
     [ObservableProperty]
     private bool puedeTransferir;
@@ -67,11 +80,62 @@ public partial class TransferenciasViewModel : ObservableObject
         if (!PuedeTransferir)
         {
             IsFormVisible = false;
+            LimpiarCampos();
         }
     }
 
     [RelayCommand]
-    private void ToggleForm() => IsFormVisible = !IsFormVisible;
+    private void ToggleForm()
+    {
+        if (IsFormVisible)
+        {
+            IsFormVisible = false;
+            LimpiarCampos();
+        }
+        else
+        {
+            LimpiarCampos();
+            IsFormVisible = true;
+        }
+    }
+
+    [RelayCommand]
+    private void Editar(Transferencia transferencia)
+    {
+        TransferenciaEnEdicion = transferencia;
+        CuentaOrigenSeleccionada = Cuentas.FirstOrDefault(c => c.NumeroCuenta == transferencia.CuentaOrigen);
+        BeneficiarioDestinoSeleccionado = Beneficiarios.FirstOrDefault(b => b.Nombre == transferencia.BeneficiarioDestino);
+        Concepto = transferencia.Concepto;
+        Monto = transferencia.Monto.ToString(CultureInfo.InvariantCulture);
+        CuentaOrigenError = null;
+        BeneficiarioDestinoError = null;
+        ConceptoError = null;
+        MontoError = null;
+        IsFormVisible = true;
+    }
+
+    [RelayCommand]
+    private async Task EliminarAsync(Transferencia transferencia)
+    {
+        var confirmar = await Shell.Current.DisplayAlert(
+            "Eliminar transferencia",
+            $"¿Seguro que deseas eliminar esta transferencia de {transferencia.Monto:C2}? El monto será devuelto a la cuenta origen.",
+            "Eliminar",
+            "Cancelar");
+
+        if (!confirmar)
+        {
+            return;
+        }
+
+        _dataService.EliminarTransferencia(transferencia);
+
+        if (TransferenciaEnEdicion == transferencia)
+        {
+            IsFormVisible = false;
+            LimpiarCampos();
+        }
+    }
 
     [RelayCommand]
     private async Task GuardarAsync()
@@ -82,6 +146,29 @@ public partial class TransferenciasViewModel : ObservableObject
         }
 
         var monto = decimal.Parse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture);
+
+        if (IsEditMode)
+        {
+            var transferencia = TransferenciaEnEdicion!;
+
+            if (!_dataService.ActualizarTransferencia(transferencia, CuentaOrigenSeleccionada!, BeneficiarioDestinoSeleccionado!, Concepto.Trim(), monto))
+            {
+                MontoError = "Fondos insuficientes en la cuenta seleccionada.";
+                return;
+            }
+
+            var beneficiarioActualizado = BeneficiarioDestinoSeleccionado!.Nombre;
+
+            IsFormVisible = false;
+            LimpiarCampos();
+
+            await Shell.Current.DisplayAlert(
+                "Transferencia actualizada",
+                $"La transferencia a {beneficiarioActualizado} fue actualizada.",
+                "Aceptar");
+            return;
+        }
+
         var beneficiarioNombre = BeneficiarioDestinoSeleccionado!.Nombre;
 
         if (!_dataService.RegistrarTransferencia(CuentaOrigenSeleccionada!, BeneficiarioDestinoSeleccionado!, Concepto.Trim(), monto))
@@ -90,7 +177,8 @@ public partial class TransferenciasViewModel : ObservableObject
             return;
         }
 
-        LimpiarFormulario();
+        IsFormVisible = false;
+        LimpiarCampos();
 
         await Shell.Current.DisplayAlert(
             "Transferencia realizada",
@@ -144,17 +232,27 @@ public partial class TransferenciasViewModel : ObservableObject
             MontoError = "El monto debe ser mayor a cero.";
             esValido = false;
         }
-        else if (CuentaOrigenSeleccionada is not null && monto > CuentaOrigenSeleccionada.Saldo)
+        else if (CuentaOrigenSeleccionada is not null)
         {
-            MontoError = "Fondos insuficientes en la cuenta seleccionada.";
-            esValido = false;
+            var saldoDisponible = CuentaOrigenSeleccionada.Saldo;
+            if (IsEditMode && TransferenciaEnEdicion!.CuentaOrigen == CuentaOrigenSeleccionada.NumeroCuenta)
+            {
+                saldoDisponible += TransferenciaEnEdicion.Monto;
+            }
+
+            if (monto > saldoDisponible)
+            {
+                MontoError = "Fondos insuficientes en la cuenta seleccionada.";
+                esValido = false;
+            }
         }
 
         return esValido;
     }
 
-    private void LimpiarFormulario()
+    private void LimpiarCampos()
     {
+        TransferenciaEnEdicion = null;
         CuentaOrigenSeleccionada = null;
         BeneficiarioDestinoSeleccionado = null;
         Concepto = string.Empty;
@@ -163,6 +261,5 @@ public partial class TransferenciasViewModel : ObservableObject
         BeneficiarioDestinoError = null;
         ConceptoError = null;
         MontoError = null;
-        IsFormVisible = false;
     }
 }

@@ -26,6 +26,18 @@ public partial class BeneficiariosViewModel : ObservableObject
     public string ToggleButtonText => IsFormVisible ? "Cancelar" : "+ Agregar beneficiario";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditMode))]
+    [NotifyPropertyChangedFor(nameof(FormTitle))]
+    [NotifyPropertyChangedFor(nameof(GuardarButtonText))]
+    private Beneficiario? beneficiarioEnEdicion;
+
+    public bool IsEditMode => BeneficiarioEnEdicion is not null;
+
+    public string FormTitle => IsEditMode ? "Editar beneficiario" : "Nuevo beneficiario";
+
+    public string GuardarButtonText => IsEditMode ? "Guardar cambios" : "Guardar";
+
+    [ObservableProperty]
     private string nombre = string.Empty;
 
     [ObservableProperty]
@@ -44,7 +56,55 @@ public partial class BeneficiariosViewModel : ObservableObject
     private string? bancoError;
 
     [RelayCommand]
-    private void ToggleForm() => IsFormVisible = !IsFormVisible;
+    private void ToggleForm()
+    {
+        if (IsFormVisible)
+        {
+            IsFormVisible = false;
+            LimpiarCampos();
+        }
+        else
+        {
+            LimpiarCampos();
+            IsFormVisible = true;
+        }
+    }
+
+    [RelayCommand]
+    private void Editar(Beneficiario beneficiario)
+    {
+        BeneficiarioEnEdicion = beneficiario;
+        Nombre = beneficiario.Nombre;
+        NumeroCuenta = beneficiario.NumeroCuenta;
+        Banco = beneficiario.Banco;
+        NombreError = null;
+        NumeroCuentaError = null;
+        BancoError = null;
+        IsFormVisible = true;
+    }
+
+    [RelayCommand]
+    private async Task EliminarAsync(Beneficiario beneficiario)
+    {
+        var confirmar = await Shell.Current.DisplayAlert(
+            "Eliminar beneficiario",
+            $"¿Seguro que deseas eliminar a {beneficiario.Nombre} de tu lista de beneficiarios?",
+            "Eliminar",
+            "Cancelar");
+
+        if (!confirmar)
+        {
+            return;
+        }
+
+        _dataService.EliminarBeneficiario(beneficiario);
+
+        if (BeneficiarioEnEdicion == beneficiario)
+        {
+            IsFormVisible = false;
+            LimpiarCampos();
+        }
+    }
 
     [RelayCommand]
     private async Task GuardarAsync()
@@ -54,20 +114,38 @@ public partial class BeneficiariosViewModel : ObservableObject
             return;
         }
 
-        var beneficiario = new Beneficiario
+        if (IsEditMode)
+        {
+            var beneficiario = BeneficiarioEnEdicion!;
+            beneficiario.Nombre = Nombre.Trim();
+            beneficiario.NumeroCuenta = NumeroCuenta.Trim();
+            beneficiario.Banco = Banco.Trim();
+
+            IsFormVisible = false;
+            LimpiarCampos();
+
+            await Shell.Current.DisplayAlert(
+                "Beneficiario actualizado",
+                $"Los datos de {beneficiario.Nombre} fueron actualizados.",
+                "Aceptar");
+            return;
+        }
+
+        var nuevoBeneficiario = new Beneficiario
         {
             Nombre = Nombre.Trim(),
             NumeroCuenta = NumeroCuenta.Trim(),
             Banco = Banco.Trim()
         };
 
-        _dataService.AgregarBeneficiario(beneficiario);
+        _dataService.AgregarBeneficiario(nuevoBeneficiario);
 
-        LimpiarFormulario();
+        IsFormVisible = false;
+        LimpiarCampos();
 
         await Shell.Current.DisplayAlert(
             "Beneficiario agregado",
-            $"{beneficiario.Nombre} fue agregado a tu lista de beneficiarios.",
+            $"{nuevoBeneficiario.Nombre} fue agregado a tu lista de beneficiarios.",
             "Aceptar");
     }
 
@@ -108,7 +186,7 @@ public partial class BeneficiariosViewModel : ObservableObject
             NumeroCuentaError = "El número de cuenta debe tener entre 8 y 12 dígitos.";
             esValido = false;
         }
-        else if (_dataService.Beneficiarios.Any(b => b.NumeroCuenta == NumeroCuenta.Trim()))
+        else if (_dataService.Beneficiarios.Any(b => b.NumeroCuenta == NumeroCuenta.Trim() && b != BeneficiarioEnEdicion))
         {
             NumeroCuentaError = "Ya existe un beneficiario con ese número de cuenta.";
             esValido = false;
@@ -129,14 +207,14 @@ public partial class BeneficiariosViewModel : ObservableObject
         return esValido;
     }
 
-    private void LimpiarFormulario()
+    private void LimpiarCampos()
     {
+        BeneficiarioEnEdicion = null;
         Nombre = string.Empty;
         NumeroCuenta = string.Empty;
         Banco = string.Empty;
         NombreError = null;
         NumeroCuentaError = null;
         BancoError = null;
-        IsFormVisible = false;
     }
 }

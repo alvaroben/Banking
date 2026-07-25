@@ -26,6 +26,18 @@ public partial class PrestamosViewModel : ObservableObject
     public string ToggleButtonText => IsFormVisible ? "Cancelar" : "+ Solicitar préstamo";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditMode))]
+    [NotifyPropertyChangedFor(nameof(FormTitle))]
+    [NotifyPropertyChangedFor(nameof(GuardarButtonText))]
+    private Prestamo? prestamoEnEdicion;
+
+    public bool IsEditMode => PrestamoEnEdicion is not null;
+
+    public string FormTitle => IsEditMode ? "Editar préstamo" : "Nuevo préstamo";
+
+    public string GuardarButtonText => IsEditMode ? "Guardar cambios" : "Solicitar préstamo";
+
+    [ObservableProperty]
     private string producto = string.Empty;
 
     [ObservableProperty]
@@ -47,13 +59,78 @@ public partial class PrestamosViewModel : ObservableObject
     private bool isBusy;
 
     [RelayCommand]
-    private void ToggleForm() => IsFormVisible = !IsFormVisible;
+    private void ToggleForm()
+    {
+        if (IsFormVisible)
+        {
+            IsFormVisible = false;
+            LimpiarCampos();
+        }
+        else
+        {
+            LimpiarCampos();
+            IsFormVisible = true;
+        }
+    }
 
     [RelayCommand]
-    private async Task SolicitarAsync()
+    private void Editar(Prestamo prestamo)
+    {
+        PrestamoEnEdicion = prestamo;
+        Producto = prestamo.Producto;
+        Monto = prestamo.MontoSolicitado.ToString(CultureInfo.InvariantCulture);
+        Plazo = prestamo.PlazoMeses.ToString(CultureInfo.InvariantCulture);
+        ProductoError = null;
+        MontoError = null;
+        PlazoError = null;
+        IsFormVisible = true;
+    }
+
+    [RelayCommand]
+    private async Task EliminarAsync(Prestamo prestamo)
+    {
+        var confirmar = await Shell.Current.DisplayAlert(
+            "Eliminar préstamo",
+            $"¿Seguro que deseas eliminar el préstamo \"{prestamo.Producto}\"? Esta acción no se puede deshacer.",
+            "Eliminar",
+            "Cancelar");
+
+        if (!confirmar)
+        {
+            return;
+        }
+
+        _dataService.EliminarPrestamo(prestamo);
+
+        if (PrestamoEnEdicion == prestamo)
+        {
+            IsFormVisible = false;
+            LimpiarCampos();
+        }
+    }
+
+    [RelayCommand]
+    private async Task GuardarAsync()
     {
         if (!Validar())
         {
+            return;
+        }
+
+        if (IsEditMode)
+        {
+            var prestamo = PrestamoEnEdicion!;
+            prestamo.Producto = Producto.Trim();
+            prestamo.MontoSolicitado = decimal.Parse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture);
+            prestamo.PlazoMeses = int.Parse(Plazo, CultureInfo.InvariantCulture);
+
+            IsFormVisible = false;
+            LimpiarCampos();
+
+            await Shell.Current.DisplayAlert(
+                "Préstamo actualizado",
+                $"Los datos del préstamo \"{prestamo.Producto}\" fueron actualizados.",
+                "Aceptar");
             return;
         }
 
@@ -61,20 +138,21 @@ public partial class PrestamosViewModel : ObservableObject
         await Task.Delay(3000);
         IsBusy = false;
 
-        var prestamo = new Prestamo
+        var nuevoPrestamo = new Prestamo
         {
             Producto = Producto.Trim(),
             MontoSolicitado = decimal.Parse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture),
             PlazoMeses = int.Parse(Plazo, CultureInfo.InvariantCulture)
         };
 
-        _dataService.AgregarPrestamo(prestamo);
+        _dataService.AgregarPrestamo(nuevoPrestamo);
 
-        LimpiarFormulario();
+        IsFormVisible = false;
+        LimpiarCampos();
 
         await Shell.Current.DisplayAlert(
             "Préstamo aprobado",
-            $"Tu préstamo de {prestamo.Producto} por {prestamo.MontoSolicitado:C2} a {prestamo.PlazoMeses} meses fue aprobado.",
+            $"Tu préstamo de {nuevoPrestamo.Producto} por {nuevoPrestamo.MontoSolicitado:C2} a {nuevoPrestamo.PlazoMeses} meses fue aprobado.",
             "Aceptar");
     }
 
@@ -136,14 +214,14 @@ public partial class PrestamosViewModel : ObservableObject
         return esValido;
     }
 
-    private void LimpiarFormulario()
+    private void LimpiarCampos()
     {
+        PrestamoEnEdicion = null;
         Producto = string.Empty;
         Monto = string.Empty;
         Plazo = string.Empty;
         ProductoError = null;
         MontoError = null;
         PlazoError = null;
-        IsFormVisible = false;
     }
 }

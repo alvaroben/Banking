@@ -1,9 +1,17 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace InternetBankingApp.Models;
 
-public class Beneficiario
+public partial class Beneficiario : ObservableObject
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string Nombre { get; set; } = string.Empty;
-    public string NumeroCuenta { get; set; } = string.Empty;
-    public string Banco { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    private string nombre = string.Empty;
+
+    [ObservableProperty]
+    private string numeroCuenta = string.Empty;
+
+    [ObservableProperty]
+    private string banco = string.Empty;
 }

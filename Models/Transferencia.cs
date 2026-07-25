@@ -1,11 +1,23 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace InternetBankingApp.Models;
 
-public class Transferencia
+public partial class Transferencia : ObservableObject
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string CuentaOrigen { get; set; } = string.Empty;
-    public string BeneficiarioDestino { get; set; } = string.Empty;
-    public string Concepto { get; set; } = string.Empty;
-    public decimal Monto { get; set; }
-    public DateTime Fecha { get; set; } = DateTime.Now;
+
+    [ObservableProperty]
+    private string cuentaOrigen = string.Empty;
+
+    [ObservableProperty]
+    private string beneficiarioDestino = string.Empty;
+
+    [ObservableProperty]
+    private string concepto = string.Empty;
+
+    [ObservableProperty]
+    private decimal monto;
+
+    [ObservableProperty]
+    private DateTime fecha = DateTime.Now;
 }
