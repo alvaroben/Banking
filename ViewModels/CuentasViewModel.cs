@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InternetBankingApp.Models;
 using InternetBankingApp.Services;
+using SQLite;
 
 namespace InternetBankingApp.ViewModels;
 
@@ -14,12 +15,14 @@ public partial class CuentasViewModel : ObservableObject
     public CuentasViewModel(BankingDataService dataService)
     {
         _dataService = dataService;
-        Cuentas = _dataService.Cuentas;
     }
 
-    public ObservableCollection<Cuenta> Cuentas { get; }
+    public ObservableCollection<Cuenta> Cuentas { get; } = [];
 
     public IReadOnlyList<string> TiposCuenta { get; } = Enum.GetNames<TipoCuenta>();
+
+    [ObservableProperty]
+    private bool isCargando;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleButtonText))]
@@ -54,6 +57,28 @@ public partial class CuentasViewModel : ObservableObject
     [ObservableProperty]
     private bool isBusy;
 
+    /// <summary>Inicialización lazy de la base de datos y carga de la lista (se llama en OnAppearing).</summary>
+    public async Task CargarAsync()
+    {
+        IsCargando = true;
+        try
+        {
+            await _dataService.InicializarAsync();
+
+            var cuentas = await _dataService.ObtenerCuentasAsync();
+
+            Cuentas.Clear();
+            foreach (var cuenta in cuentas)
+            {
+                Cuentas.Add(cuenta);
+            }
+        }
+        finally
+        {
+            IsCargando = false;
+        }
+    }
+
     [RelayCommand]
     private void ToggleForm()
     {
@@ -83,7 +108,7 @@ public partial class CuentasViewModel : ObservableObject
     [RelayCommand]
     private async Task EliminarAsync(Cuenta cuenta)
     {
-        var confirmar = await Shell.Current.DisplayAlert(
+        var confirmar = await Shell.Current.DisplayAlertAsync(
             "Eliminar cuenta",
             $"¿Seguro que deseas eliminar la cuenta {cuenta.NumeroCuenta}? Esta acción no se puede deshacer.",
             "Eliminar",
@@ -94,7 +119,8 @@ public partial class CuentasViewModel : ObservableObject
             return;
         }
 
-        _dataService.EliminarCuenta(cuenta);
+        await _dataService.EliminarCuentaAsync(cuenta);
+        Cuentas.Remove(cuenta);
 
         if (CuentaEnEdicion == cuenta)
         {
@@ -111,16 +137,21 @@ public partial class CuentasViewModel : ObservableObject
             return;
         }
 
+        var saldo = decimal.Parse(Saldo, NumberStyles.Number, CultureInfo.InvariantCulture);
+
         if (IsEditMode)
         {
             var cuenta = CuentaEnEdicion!;
             cuenta.Tipo = Enum.Parse<TipoCuenta>(TipoSeleccionado!);
-            cuenta.Saldo = decimal.Parse(Saldo, NumberStyles.Number, CultureInfo.InvariantCulture);
+            cuenta.Saldo = saldo;
+
+            await _dataService.GuardarCuentaAsync(cuenta);
 
             IsFormVisible = false;
             LimpiarCampos();
+            await CargarAsync();
 
-            await Shell.Current.DisplayAlert(
+            await Shell.Current.DisplayAlertAsync(
                 "Cuenta actualizada",
                 $"Los datos de la cuenta {cuenta.NumeroCuenta} fueron actualizados.",
                 "Aceptar");
@@ -133,17 +164,29 @@ public partial class CuentasViewModel : ObservableObject
 
         var nuevaCuenta = new Cuenta
         {
-            NumeroCuenta = _dataService.GenerarNumeroCuenta(),
+            NumeroCuenta = await _dataService.GenerarNumeroCuentaAsync(),
             Tipo = Enum.Parse<TipoCuenta>(TipoSeleccionado!),
-            Saldo = decimal.Parse(Saldo, NumberStyles.Number, CultureInfo.InvariantCulture)
+            Saldo = saldo
         };
 
-        _dataService.AgregarCuenta(nuevaCuenta);
+        try
+        {
+            await _dataService.GuardarCuentaAsync(nuevaCuenta);
+        }
+        catch (SQLiteException excepcion) when (excepcion.Result == SQLite3.Result.Constraint)
+        {
+            // El número lo genera el banco, pero la columna es [Unique]: si en el instante entre
+            // generarlo y guardarlo otro registro tomó ese número, se avisa inline y no se pierde
+            // lo que el usuario escribió.
+            SaldoError = "No se pudo asignar un número de cuenta libre. Intenta de nuevo.";
+            return;
+        }
 
         IsFormVisible = false;
         LimpiarCampos();
+        await CargarAsync();
 
-        await Shell.Current.DisplayAlert(
+        await Shell.Current.DisplayAlertAsync(
             "Cuenta aprobada",
             $"Tu nueva cuenta {nuevaCuenta.NumeroCuenta} ha sido creada.",
             "Aceptar");

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:InternetBankingApp.Models"
+             xmlns:vm="clr-namespace:InternetBankingApp.ViewModels"
+             x:Class="InternetBankingApp.Views.DashboardPage"
+             x:Name="PageRoot"
+             x:DataType="vm:DashboardViewModel"
+             Title="Inicio">
+
+    <RefreshView IsRefreshing="{Binding IsCargando}" Command="{Binding RefrescarCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="16">
+
+                <!-- Patrimonio neto: saldo disponible menos lo que se debe por préstamos -->
+                <Border BackgroundColor="{StaticResource MidnightBlue}" Stroke="{StaticResource MidnightBlue}" Padding="20">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <Border.Shadow>
+                        <Shadow Brush="{StaticResource Tertiary}" Opacity="0.22" Radius="18" Offset="0,8" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Patrimonio neto" TextColor="{StaticResource EmeraldLight}" FontSize="13" />
+                        <Label Text="{Binding PatrimonioNeto, StringFormat='{0:C2}'}"
+                               TextColor="{StaticResource White}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="30" />
+                        <Label Text="Saldo disponible menos la deuda vigente de tus préstamos."
+                               TextColor="{StaticResource Gray200}"
+                               FontSize="12" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" RowSpacing="12">
+
+                    <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{StaticResource White}" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Saldo total" TextColor="{StaticResource Gray500}" FontSize="12" />
+                            <Label Text="{Binding SaldoTotal, StringFormat='{0:C2}'}"
+                                   TextColor="{StaticResource EmeraldDark}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="18" />
+                            <Label Text="{Binding CantidadCuentas, StringFormat='{0} cuenta(s)'}"
+                                   TextColor="{StaticResource Gray400}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{StaticResource White}" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Deuda por préstamos" TextColor="{StaticResource Gray500}" FontSize="12" />
+                            <Label Text="{Binding DeudaPrestamos, StringFormat='{0:C2}'}"
+                                   TextColor="{StaticResource Danger}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="18" />
+                            <Label Text="{Binding PrestamosActivos, StringFormat='{0} préstamo(s) vigente(s)'}"
+                                   TextColor="{StaticResource Gray400}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{StaticResource White}" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Cuota mensual comprometida" TextColor="{StaticResource Gray500}" FontSize="12" />
+                            <Label Text="{Binding CuotaMensualComprometida, StringFormat='{0:C2}'}"
+                                   TextColor="{StaticResource MidnightBlue}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="18" />
+                            <Label Text="Suma de las cuotas de tus préstamos" TextColor="{StaticResource Gray400}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{StaticResource White}" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Total transferido" TextColor="{StaticResource Gray500}" FontSize="12" />
+                            <Label Text="{Binding TotalTransferido, StringFormat='{0:C2}'}"
+                                   TextColor="{StaticResource MidnightBlue}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="18" />
+                            <Label Text="{Binding CantidadBeneficiarios, StringFormat='{0} beneficiario(s)'}"
+                                   TextColor="{StaticResource Gray400}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Gráfico de barras dibujado con Microsoft.Maui.Graphics -->
+                <Border BackgroundColor="{StaticResource White}" Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Transferencias por mes" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Label Text="{Binding MesMasActivo}"
+                               TextColor="{StaticResource Gray500}"
+                               FontSize="12"
+                               IsVisible="{Binding HayDatosGrafico}" />
+                        <GraphicsView x:Name="GraficoTransferencias"
+                                      Drawable="{Binding GraficoDrawable}"
+                                      HeightRequest="180" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Ranking calculado con GROUP BY en SQLite -->
+                <Border BackgroundColor="{StaticResource White}" Padding="16" IsVisible="{Binding HayBeneficiarios}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="A quién le transfieres más" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <CollectionView ItemsSource="{Binding TopBeneficiarios}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:TotalPorBeneficiario">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="0,8">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Nombre}" TextColor="{StaticResource MidnightBlue}" FontSize="14" />
+                                            <Label Text="{Binding CantidadTexto}" TextColor="{StaticResource Gray400}" FontSize="12" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding Total, StringFormat='{0:C2}'}"
+                                               TextColor="{StaticResource EmeraldDark}"
+                                               FontFamily="OpenSansSemibold"
+                                               VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Saldo por cuenta -->
+                <Border BackgroundColor="{StaticResource White}" Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Tus cuentas" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <CollectionView ItemsSource="{Binding Cuentas}">
+                            <CollectionView.EmptyView>
+                                <Label Text="Todavía no tienes cuentas abiertas." TextColor="{StaticResource Gray400}" FontSize="13" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Cuenta">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="0,8">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding NumeroCuenta}" TextColor="{StaticResource MidnightBlue}" FontSize="14" />
+                                            <Label Text="{Binding Tipo}" TextColor="{StaticResource Gray400}" FontSize="12" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding Saldo, StringFormat='{0:C2}'}"
+                                               TextColor="{StaticResource EmeraldDark}"
+                                               FontFamily="OpenSansSemibold"
+                                               VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Accesos rápidos" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="16" />
+
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Button Grid.Column="0" Text="Cuentas" FontSize="14" Padding="8,12" Command="{Binding IrACuentasCommand}" />
+                    <Button Grid.Column="1" Text="Transferir" FontSize="14" Padding="8,12" Command="{Binding IrATransferenciasCommand}" />
+                    <Button Grid.Column="2" Text="Programadas" FontSize="14" Padding="8,12" Command="{Binding IrAProgramadasCommand}" />
+                </Grid>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

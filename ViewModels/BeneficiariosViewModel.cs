@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InternetBankingApp.Models;
 using InternetBankingApp.Services;
+using SQLite;
 
 namespace InternetBankingApp.ViewModels;
 
@@ -14,10 +14,12 @@ public partial class BeneficiariosViewModel : ObservableObject
     public BeneficiariosViewModel(BankingDataService dataService)
     {
         _dataService = dataService;
-        Beneficiarios = _dataService.Beneficiarios;
     }
 
-    public ObservableCollection<Beneficiario> Beneficiarios { get; }
+    public ObservableCollection<Beneficiario> Beneficiarios { get; } = [];
+
+    [ObservableProperty]
+    private bool isCargando;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleButtonText))]
@@ -55,6 +57,31 @@ public partial class BeneficiariosViewModel : ObservableObject
     [ObservableProperty]
     private string? bancoError;
 
+    /// <summary>
+    /// Punto de entrada desde el OnAppearing de la página: inicializa la base de datos de forma
+    /// perezosa (solo la primera vez cuesta algo) y trae los beneficiarios guardados.
+    /// </summary>
+    public async Task CargarAsync()
+    {
+        IsCargando = true;
+        try
+        {
+            await _dataService.InicializarAsync();
+
+            var beneficiarios = await _dataService.ObtenerBeneficiariosAsync();
+
+            Beneficiarios.Clear();
+            foreach (var beneficiario in beneficiarios)
+            {
+                Beneficiarios.Add(beneficiario);
+            }
+        }
+        finally
+        {
+            IsCargando = false;
+        }
+    }
+
     [RelayCommand]
     private void ToggleForm()
     {
@@ -86,7 +113,7 @@ public partial class BeneficiariosViewModel : ObservableObject
     [RelayCommand]
     private async Task EliminarAsync(Beneficiario beneficiario)
     {
-        var confirmar = await Shell.Current.DisplayAlert(
+        var confirmar = await Shell.Current.DisplayAlertAsync(
             "Eliminar beneficiario",
             $"¿Seguro que deseas eliminar a {beneficiario.Nombre} de tu lista de beneficiarios?",
             "Eliminar",
@@ -97,7 +124,8 @@ public partial class BeneficiariosViewModel : ObservableObject
             return;
         }
 
-        _dataService.EliminarBeneficiario(beneficiario);
+        await _dataService.EliminarBeneficiarioAsync(beneficiario);
+        Beneficiarios.Remove(beneficiario);
 
         if (BeneficiarioEnEdicion == beneficiario)
         {
@@ -114,39 +142,38 @@ public partial class BeneficiariosViewModel : ObservableObject
             return;
         }
 
-        if (IsEditMode)
+        // Se guarda sobre una copia: si la base rechaza el número de cuenta por duplicado, el
+        // beneficiario que se está mostrando en la lista queda intacto.
+        var candidato = new Beneficiario
         {
-            var beneficiario = BeneficiarioEnEdicion!;
-            beneficiario.Nombre = Nombre.Trim();
-            beneficiario.NumeroCuenta = NumeroCuenta.Trim();
-            beneficiario.Banco = Banco.Trim();
-
-            IsFormVisible = false;
-            LimpiarCampos();
-
-            await Shell.Current.DisplayAlert(
-                "Beneficiario actualizado",
-                $"Los datos de {beneficiario.Nombre} fueron actualizados.",
-                "Aceptar");
-            return;
-        }
-
-        var nuevoBeneficiario = new Beneficiario
-        {
+            Id = BeneficiarioEnEdicion?.Id ?? 0,
             Nombre = Nombre.Trim(),
             NumeroCuenta = NumeroCuenta.Trim(),
             Banco = Banco.Trim()
         };
 
-        _dataService.AgregarBeneficiario(nuevoBeneficiario);
+        try
+        {
+            await _dataService.GuardarBeneficiarioAsync(candidato);
+        }
+        catch (SQLiteException excepcion) when (excepcion.Result == SQLite3.Result.Constraint)
+        {
+            // La unicidad la garantiza la base de datos (columna NumeroCuenta marcada con [Unique]),
+            // no una comprobación en memoria: el mensaje aparece inline, debajo del campo.
+            NumeroCuentaError = "Ya existe un beneficiario registrado con ese número de cuenta.";
+            return;
+        }
+
+        var mensaje = IsEditMode
+            ? $"Los datos de {candidato.Nombre} fueron actualizados."
+            : $"{candidato.Nombre} fue agregado a tu lista de beneficiarios.";
+        var titulo = IsEditMode ? "Beneficiario actualizado" : "Beneficiario agregado";
 
         IsFormVisible = false;
         LimpiarCampos();
+        await CargarAsync();
 
-        await Shell.Current.DisplayAlert(
-            "Beneficiario agregado",
-            $"{nuevoBeneficiario.Nombre} fue agregado a tu lista de beneficiarios.",
-            "Aceptar");
+        await Shell.Current.DisplayAlertAsync(titulo, mensaje, "Aceptar");
     }
 
     private bool Validar()
@@ -184,11 +211,6 @@ public partial class BeneficiariosViewModel : ObservableObject
         else if (NumeroCuenta.Trim().Length < 8 || NumeroCuenta.Trim().Length > 12)
         {
             NumeroCuentaError = "El número de cuenta debe tener entre 8 y 12 dígitos.";
-            esValido = false;
-        }
-        else if (_dataService.Beneficiarios.Any(b => b.NumeroCuenta == NumeroCuenta.Trim() && b != BeneficiarioEnEdicion))
-        {
-            NumeroCuentaError = "Ya existe un beneficiario con ese número de cuenta.";
             esValido = false;
         }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Pantalla de arranque: el mismo logotipo, sobre el navy institucional que define el csproj. -->
+<!-- Logotipo para usar dentro de la app (login y encabezado del menú lateral). -->
 <svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
     <defs>
         <linearGradient id="escudo" x1="96" y1="70" x2="360" y2="386" gradientUnits="userSpaceOnUse">

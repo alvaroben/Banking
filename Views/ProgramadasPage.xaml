@@ -3,22 +3,26 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:InternetBankingApp.Models"
              xmlns:vm="clr-namespace:InternetBankingApp.ViewModels"
-             x:Class="InternetBankingApp.Views.TransferenciasPage"
+             x:Class="InternetBankingApp.Views.ProgramadasPage"
              x:Name="PageRoot"
-             x:DataType="vm:TransferenciasViewModel"
-             Title="Transferencias">
+             x:DataType="vm:ProgramadasViewModel"
+             Title="Programadas">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
 
-            <Label Text="Necesitas al menos una cuenta y un beneficiario registrados para poder transferir."
+            <Label Text="Las órdenes programadas se cobran solas cuando vencen: al abrir la app se ejecutan todas las que quedaron pendientes."
+                   TextColor="{StaticResource Gray500}"
+                   FontSize="13" />
+
+            <Label Text="Necesitas al menos una cuenta y un beneficiario registrados para programar transferencias."
                    TextColor="{StaticResource Danger}"
                    FontSize="13"
                    IsVisible="{Binding RequisitoVisible}" />
 
             <Button Text="{Binding ToggleButtonText}"
                     HorizontalOptions="Fill"
-                    IsEnabled="{Binding PuedeTransferir}"
+                    IsEnabled="{Binding PuedeProgramar}"
                     Command="{Binding ToggleFormCommand}" />
 
             <Border IsVisible="{Binding IsFormVisible}"
@@ -56,7 +60,7 @@
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Concepto" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry Text="{Binding Concepto}" Placeholder="Ej. Pago de servicios" />
+                        <Entry Text="{Binding Concepto}" Placeholder="Ej. Alquiler" />
                         <Label Text="{Binding ConceptoError}"
                                TextColor="{StaticResource Danger}"
                                FontSize="12"
@@ -72,43 +76,85 @@
                                IsVisible="{Binding MontoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
 
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Frecuencia" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <Picker Title="¿Cada cuánto se repite?"
+                                ItemsSource="{Binding Frecuencias}"
+                                SelectedItem="{Binding FrecuenciaSeleccionada}" />
+                        <Label Text="{Binding FrecuenciaError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               IsVisible="{Binding FrecuenciaError, Converter={StaticResource StringNotEmptyConverter}}" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Primera ejecución" TextColor="{StaticResource Gray500}" FontSize="13" />
+                        <DatePicker Date="{Binding PrimeraEjecucion}" Format="dd/MM/yyyy" />
+                    </VerticalStackLayout>
+
                     <Button Text="{Binding GuardarButtonText}" Command="{Binding GuardarCommand}" />
 
-                    <Button Text="Eliminar transferencia"
+                    <Button Text="Eliminar orden"
                             Style="{StaticResource DangerButtonStyle}"
                             Command="{Binding EliminarCommand}"
-                            CommandParameter="{Binding TransferenciaEnEdicion}"
+                            CommandParameter="{Binding ProgramacionEnEdicion}"
                             IsVisible="{Binding IsEditMode}" />
                 </VerticalStackLayout>
             </Border>
 
-            <Label Text="Transferencias registradas" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="17" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <Label Grid.Column="0"
+                       Text="Órdenes activas"
+                       TextColor="{StaticResource MidnightBlue}"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="17"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="Ejecutar vencidas"
+                        FontSize="13"
+                        Padding="12,8"
+                        MinimumHeightRequest="36"
+                        Command="{Binding EjecutarAhoraCommand}" />
+            </Grid>
 
-            <CollectionView ItemsSource="{Binding Transferencias}">
+            <CollectionView ItemsSource="{Binding Programaciones}">
                 <CollectionView.EmptyView>
-                    <Label Text="No hay transferencias registradas aún." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
+                    <Label Text="No tienes transferencias programadas todavía." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
                 </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Transferencia">
-                        <Border Stroke="{StaticResource Gray200}" BackgroundColor="{StaticResource White}" Margin="0,0,0,10" Padding="16">
+                    <DataTemplate x:DataType="models:TransferenciaProgramada">
+                        <Border Stroke="{StaticResource Gray200}" Margin="0,0,0,10" Padding="16" BackgroundColor="{StaticResource White}">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="12" />
                             </Border.StrokeShape>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding BindingContext.EditarCommand, Source={x:Reference PageRoot}}" CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto,Auto">
+                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
                                 <Label Grid.Row="0" Grid.Column="0" Text="{Binding Concepto}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
                                 <Label Grid.Row="0" Grid.Column="1" Text="{Binding Monto, StringFormat='{0:C2}'}" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
-                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding CuentaOrigen, StringFormat='Desde cuenta: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
-                                <Label Grid.Row="2" Grid.Column="0" Text="{Binding BeneficiarioDestino, StringFormat='Para: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
-                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Fecha, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray400}" FontSize="13" />
-                                <Button Grid.Row="0" Grid.RowSpan="3" Grid.Column="2"
-                                        Style="{StaticResource DeleteIconButtonStyle}"
-                                        VerticalOptions="Center"
-                                        Margin="10,0,0,0"
-                                        Command="{Binding BindingContext.EliminarCommand, Source={x:Reference PageRoot}}"
-                                        CommandParameter="{Binding .}" />
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding BeneficiarioDestino, StringFormat='Para: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
+                                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding CuentaOrigen, StringFormat='Desde: {0}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
+                                <Label Grid.Row="3" Grid.Column="0" Text="{Binding FrecuenciaTexto}" TextColor="{StaticResource Gray400}" FontSize="12" />
+                                <Label Grid.Row="3" Grid.Column="1" Text="{Binding EjecucionesTexto}" TextColor="{StaticResource Gray400}" FontSize="12" />
+                                <Label Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding EstadoTexto}"
+                                       TextColor="{StaticResource Gray500}"
+                                       FontSize="12"
+                                       Margin="0,4,0,0" />
+
+                                <VerticalStackLayout Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Spacing="6" VerticalOptions="Center">
+                                    <Button Text="{Binding AccionTexto}"
+                                            FontSize="12"
+                                            Padding="10,6"
+                                            MinimumHeightRequest="32"
+                                            Command="{Binding BindingContext.AlternarEstadoCommand, Source={x:Reference PageRoot}}"
+                                            CommandParameter="{Binding .}" />
+                                    <Button Style="{StaticResource DeleteIconButtonStyle}"
+                                            HorizontalOptions="End"
+                                            Command="{Binding BindingContext.EliminarCommand, Source={x:Reference PageRoot}}"
+                                            CommandParameter="{Binding .}" />
+                                </VerticalStackLayout>
                             </Grid>
                         </Border>
                     </DataTemplate>

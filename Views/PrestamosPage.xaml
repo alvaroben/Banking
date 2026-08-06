@@ -29,7 +29,10 @@
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Producto" TextColor="{StaticResource Gray500}" FontSize="13" />
-                        <Entry Text="{Binding Producto}" Placeholder="Ej. Préstamo personal" />
+                        <!-- Cada producto del catálogo trae su tasa anual: el banco la fija, el usuario no la escribe -->
+                        <Picker Title="Selecciona un producto"
+                                ItemsSource="{Binding Productos}"
+                                SelectedItem="{Binding ProductoSeleccionado}" />
                         <Label Text="{Binding ProductoError}"
                                TextColor="{StaticResource Danger}"
                                FontSize="12"
@@ -53,6 +56,23 @@
                                FontSize="12"
                                IsVisible="{Binding PlazoError, Converter={StaticResource StringNotEmptyConverter}}" />
                     </VerticalStackLayout>
+
+                    <!-- Simulador: se recalcula solo mientras el usuario escribe monto y plazo -->
+                    <Border IsVisible="{Binding SimulacionVisible}"
+                            BackgroundColor="{StaticResource Secondary}"
+                            Stroke="{StaticResource EmeraldLight}"
+                            Padding="14">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Simulación de tu préstamo" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" FontSize="14" />
+                            <Label Text="{Binding CuotaSimulada, StringFormat='Cuota mensual: {0:C2}'}" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="16" />
+                            <Label Text="{Binding TasaSimulada, StringFormat='Tasa aplicada: {0}'}" TextColor="{StaticResource Gray600}" FontSize="12" />
+                            <Label Text="{Binding TotalInteresesSimulado, StringFormat='Intereses totales: {0:C2}'}" TextColor="{StaticResource Gray600}" FontSize="12" />
+                            <Label Text="{Binding TotalPagarSimulado, StringFormat='Total a pagar: {0:C2}'}" TextColor="{StaticResource Gray600}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
 
                     <Button Text="{Binding GuardarButtonText}"
                             Command="{Binding GuardarCommand}"
@@ -79,19 +99,29 @@
                 </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Prestamo">
-                        <Border Stroke="{StaticResource Gray200}" Margin="0,0,0,10" Padding="16">
+                        <Border Stroke="{StaticResource Gray200}" BackgroundColor="{StaticResource White}" Margin="0,0,0,10" Padding="16">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="12" />
                             </Border.StrokeShape>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding BindingContext.EditarCommand, Source={x:Reference PageRoot}}" CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10">
                                 <Label Grid.Row="0" Grid.Column="0" Text="{Binding Producto}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource MidnightBlue}" />
                                 <Label Grid.Row="0" Grid.Column="1" Text="{Binding PlazoMeses, StringFormat='{0} meses'}" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
                                 <Label Grid.Row="1" Grid.Column="0" Text="{Binding MontoSolicitado, StringFormat='Monto: {0:C2}'}" TextColor="{StaticResource Gray500}" FontSize="13" />
                                 <Label Grid.Row="1" Grid.Column="1" Text="{Binding FechaSolicitud, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray400}" FontSize="13" />
-                                <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2"
+                                <Label Grid.Row="2" Grid.Column="0" Text="{Binding CuotaMensual, StringFormat='Cuota: {0:C2} al mes'}" TextColor="{StaticResource Gray500}" FontSize="13" />
+                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding TasaTexto}" TextColor="{StaticResource Gray400}" FontSize="13" />
+                                <Label Grid.Row="3" Grid.Column="0" Text="{Binding CuotasTexto}" TextColor="{StaticResource Gray400}" FontSize="12" />
+                                <Button Grid.Row="3" Grid.Column="1"
+                                        Text="Plan de pagos"
+                                        FontSize="12"
+                                        Padding="10,6"
+                                        MinimumHeightRequest="32"
+                                        Command="{Binding BindingContext.VerDetalleCommand, Source={x:Reference PageRoot}}"
+                                        CommandParameter="{Binding .}" />
+                                <Button Grid.Row="0" Grid.RowSpan="4" Grid.Column="2"
                                         Style="{StaticResource DeleteIconButtonStyle}"
                                         VerticalOptions="Center"
                                         Margin="10,0,0,0"

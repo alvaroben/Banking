@@ -28,7 +28,7 @@
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Display name -->
-		<ApplicationTitle>InternetBankingApp</ApplicationTitle>
+		<ApplicationTitle>Internet Banking</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.internetbankingapp</ApplicationId>
@@ -56,8 +56,7 @@
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
-		
+
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
@@ -69,6 +68,10 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+		<!-- Se fija la versión más reciente publicada del motor nativo, por encima de la que
+		     arrastra sqlite-net-pcl (2.1.10). -->
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.11" />
 	</ItemGroup>
 
 </Project>

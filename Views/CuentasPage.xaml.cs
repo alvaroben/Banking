@@ -15,6 +15,14 @@ public partial class CuentasPage : ContentPage
         _viewModel.PropertyChanged += OnViewModelPropertyChanged;
     }
 
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // Inicialización lazy de SQLite + carga de las cuentas persistidas.
+        await _viewModel.CargarAsync();
+    }
+
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(CuentasViewModel.IsBusy))

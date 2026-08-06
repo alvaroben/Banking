@@ -49,7 +49,7 @@ public partial class LoginViewModel : ObservableObject
         Contrasena = string.Empty;
 
         Shell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
-        await Shell.Current.GoToAsync($"//{nameof(CuentasPage)}");
+        await Shell.Current.GoToAsync($"//{nameof(DashboardPage)}");
     }
 
     private bool Validar()

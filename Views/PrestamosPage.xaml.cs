@@ -15,6 +15,14 @@ public partial class PrestamosPage : ContentPage
         _viewModel.PropertyChanged += OnViewModelPropertyChanged;
     }
 
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // Inicialización lazy de SQLite + carga de los préstamos persistidos (y sus cuotas pagadas).
+        await _viewModel.CargarAsync();
+    }
+
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(PrestamosViewModel.IsBusy))

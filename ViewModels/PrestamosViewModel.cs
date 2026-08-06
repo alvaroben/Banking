@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InternetBankingApp.Models;
 using InternetBankingApp.Services;
+using InternetBankingApp.Views;
 
 namespace InternetBankingApp.ViewModels;
 
@@ -14,10 +15,15 @@ public partial class PrestamosViewModel : ObservableObject
     public PrestamosViewModel(BankingDataService dataService)
     {
         _dataService = dataService;
-        Prestamos = _dataService.Prestamos;
     }
 
-    public ObservableCollection<Prestamo> Prestamos { get; }
+    public ObservableCollection<Prestamo> Prestamos { get; } = [];
+
+    /// <summary>Catálogo del banco: cada producto trae su tasa anual y su tope de monto.</summary>
+    public IReadOnlyList<ProductoPrestamo> Productos { get; } = AmortizacionService.Catalogo;
+
+    [ObservableProperty]
+    private bool isCargando;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleButtonText))]
@@ -38,7 +44,7 @@ public partial class PrestamosViewModel : ObservableObject
     public string GuardarButtonText => IsEditMode ? "Guardar cambios" : "Solicitar préstamo";
 
     [ObservableProperty]
-    private string producto = string.Empty;
+    private ProductoPrestamo? productoSeleccionado;
 
     [ObservableProperty]
     private string monto = string.Empty;
@@ -57,6 +63,79 @@ public partial class PrestamosViewModel : ObservableObject
 
     [ObservableProperty]
     private bool isBusy;
+
+    // ── Simulación en vivo: se recalcula mientras el usuario escribe ──
+
+    [ObservableProperty]
+    private bool simulacionVisible;
+
+    [ObservableProperty]
+    private decimal cuotaSimulada;
+
+    [ObservableProperty]
+    private decimal totalPagarSimulado;
+
+    [ObservableProperty]
+    private decimal totalInteresesSimulado;
+
+    [ObservableProperty]
+    private string tasaSimulada = string.Empty;
+
+    partial void OnProductoSeleccionadoChanged(ProductoPrestamo? value) => ActualizarSimulacion();
+
+    partial void OnMontoChanged(string value) => ActualizarSimulacion();
+
+    partial void OnPlazoChanged(string value) => ActualizarSimulacion();
+
+    /// <summary>
+    /// Calcula la cuota estimada con lo que haya escrito hasta ahora. No valida ni muestra errores:
+    /// si los datos aún no dan, simplemente esconde el recuadro de simulación.
+    /// </summary>
+    private void ActualizarSimulacion()
+    {
+        var hayDatos = ProductoSeleccionado is not null
+            && decimal.TryParse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture, out var montoValor)
+            && montoValor > 0
+            && int.TryParse(Plazo, out var plazoValor)
+            && plazoValor > 0;
+
+        if (!hayDatos)
+        {
+            SimulacionVisible = false;
+            return;
+        }
+
+        var capital = decimal.Parse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture);
+        var meses = int.Parse(Plazo, CultureInfo.InvariantCulture);
+        var tasa = ProductoSeleccionado!.TasaAnual;
+
+        CuotaSimulada = AmortizacionService.CalcularCuota(capital, tasa, meses);
+        TotalPagarSimulado = CuotaSimulada * meses;
+        TotalInteresesSimulado = TotalPagarSimulado - capital;
+        TasaSimulada = $"{tasa:0.##}% anual";
+        SimulacionVisible = true;
+    }
+
+    public async Task CargarAsync()
+    {
+        IsCargando = true;
+        try
+        {
+            await _dataService.InicializarAsync();
+
+            var prestamos = await _dataService.ObtenerPrestamosAsync();
+
+            Prestamos.Clear();
+            foreach (var prestamo in prestamos)
+            {
+                Prestamos.Add(prestamo);
+            }
+        }
+        finally
+        {
+            IsCargando = false;
+        }
+    }
 
     [RelayCommand]
     private void ToggleForm()
@@ -77,7 +156,7 @@ public partial class PrestamosViewModel : ObservableObject
     private void Editar(Prestamo prestamo)
     {
         PrestamoEnEdicion = prestamo;
-        Producto = prestamo.Producto;
+        ProductoSeleccionado = AmortizacionService.BuscarProducto(prestamo.Producto);
         Monto = prestamo.MontoSolicitado.ToString(CultureInfo.InvariantCulture);
         Plazo = prestamo.PlazoMeses.ToString(CultureInfo.InvariantCulture);
         ProductoError = null;
@@ -86,12 +165,19 @@ public partial class PrestamosViewModel : ObservableObject
         IsFormVisible = true;
     }
 
+    /// <summary>Abre el plan de pagos (tabla de amortización) del préstamo.</summary>
+    [RelayCommand]
+    private async Task VerDetalleAsync(Prestamo prestamo)
+    {
+        await Shell.Current.GoToAsync($"{nameof(PrestamoDetallePage)}?prestamoId={prestamo.Id}");
+    }
+
     [RelayCommand]
     private async Task EliminarAsync(Prestamo prestamo)
     {
-        var confirmar = await Shell.Current.DisplayAlert(
+        var confirmar = await Shell.Current.DisplayAlertAsync(
             "Eliminar préstamo",
-            $"¿Seguro que deseas eliminar el préstamo \"{prestamo.Producto}\"? Esta acción no se puede deshacer.",
+            $"¿Seguro que deseas eliminar el préstamo \"{prestamo.Producto}\"? Se borrará también su historial de pagos.",
             "Eliminar",
             "Cancelar");
 
@@ -100,7 +186,8 @@ public partial class PrestamosViewModel : ObservableObject
             return;
         }
 
-        _dataService.EliminarPrestamo(prestamo);
+        await _dataService.EliminarPrestamoAsync(prestamo);
+        Prestamos.Remove(prestamo);
 
         if (PrestamoEnEdicion == prestamo)
         {
@@ -117,17 +204,32 @@ public partial class PrestamosViewModel : ObservableObject
             return;
         }
 
+        var capital = decimal.Parse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture);
+        var meses = int.Parse(Plazo, CultureInfo.InvariantCulture);
+        var producto = ProductoSeleccionado!;
+
         if (IsEditMode)
         {
             var prestamo = PrestamoEnEdicion!;
-            prestamo.Producto = Producto.Trim();
-            prestamo.MontoSolicitado = decimal.Parse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture);
-            prestamo.PlazoMeses = int.Parse(Plazo, CultureInfo.InvariantCulture);
+
+            if (prestamo.CuotasPagadas > 0 && prestamo.CuotasPagadas > meses)
+            {
+                PlazoError = $"Ya pagaste {prestamo.CuotasPagadas} cuotas: el plazo no puede ser menor.";
+                return;
+            }
+
+            prestamo.Producto = producto.Nombre;
+            prestamo.TasaAnual = producto.TasaAnual;
+            prestamo.MontoSolicitado = capital;
+            prestamo.PlazoMeses = meses;
+
+            await _dataService.GuardarPrestamoAsync(prestamo);
 
             IsFormVisible = false;
             LimpiarCampos();
+            await CargarAsync();
 
-            await Shell.Current.DisplayAlert(
+            await Shell.Current.DisplayAlertAsync(
                 "Préstamo actualizado",
                 $"Los datos del préstamo \"{prestamo.Producto}\" fueron actualizados.",
                 "Aceptar");
@@ -140,19 +242,22 @@ public partial class PrestamosViewModel : ObservableObject
 
         var nuevoPrestamo = new Prestamo
         {
-            Producto = Producto.Trim(),
-            MontoSolicitado = decimal.Parse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture),
-            PlazoMeses = int.Parse(Plazo, CultureInfo.InvariantCulture)
+            Producto = producto.Nombre,
+            TasaAnual = producto.TasaAnual,
+            MontoSolicitado = capital,
+            PlazoMeses = meses
         };
 
-        _dataService.AgregarPrestamo(nuevoPrestamo);
+        await _dataService.GuardarPrestamoAsync(nuevoPrestamo);
 
         IsFormVisible = false;
         LimpiarCampos();
+        await CargarAsync();
 
-        await Shell.Current.DisplayAlert(
+        await Shell.Current.DisplayAlertAsync(
             "Préstamo aprobado",
-            $"Tu préstamo de {nuevoPrestamo.Producto} por {nuevoPrestamo.MontoSolicitado:C2} a {nuevoPrestamo.PlazoMeses} meses fue aprobado.",
+            $"Tu {nuevoPrestamo.Producto.ToLowerInvariant()} por {nuevoPrestamo.MontoSolicitado:C2} fue aprobado a {nuevoPrestamo.TasaTexto}.\n\n" +
+            $"Cuota mensual: {nuevoPrestamo.CuotaMensual:C2} durante {nuevoPrestamo.PlazoMeses} meses.",
             "Aceptar");
     }
 
@@ -161,14 +266,9 @@ public partial class PrestamosViewModel : ObservableObject
         var esValido = true;
 
         ProductoError = null;
-        if (string.IsNullOrWhiteSpace(Producto))
+        if (ProductoSeleccionado is null)
         {
-            ProductoError = "El producto es obligatorio.";
-            esValido = false;
-        }
-        else if (Producto.Trim().Length < 3)
-        {
-            ProductoError = "El producto debe tener al menos 3 caracteres.";
+            ProductoError = "Selecciona un producto de préstamo.";
             esValido = false;
         }
 
@@ -188,9 +288,9 @@ public partial class PrestamosViewModel : ObservableObject
             MontoError = "El monto solicitado debe ser mayor a cero.";
             esValido = false;
         }
-        else if (monto > 1_000_000)
+        else if (ProductoSeleccionado is not null && monto > ProductoSeleccionado.MontoMaximo)
         {
-            MontoError = "El monto solicitado no puede exceder RD$1,000,000.00.";
+            MontoError = $"El monto máximo para {ProductoSeleccionado.Nombre.ToLowerInvariant()} es {ProductoSeleccionado.MontoMaximo:C2}.";
             esValido = false;
         }
 
@@ -217,11 +317,12 @@ public partial class PrestamosViewModel : ObservableObject
     private void LimpiarCampos()
     {
         PrestamoEnEdicion = null;
-        Producto = string.Empty;
+        ProductoSeleccionado = null;
         Monto = string.Empty;
         Plazo = string.Empty;
         ProductoError = null;
         MontoError = null;
         PlazoError = null;
+        SimulacionVisible = false;
     }
 }

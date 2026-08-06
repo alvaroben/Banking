@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InternetBankingApp.Models;
@@ -15,14 +14,14 @@ public partial class TransferenciasViewModel : ObservableObject
     public TransferenciasViewModel(BankingDataService dataService)
     {
         _dataService = dataService;
-        Cuentas = _dataService.Cuentas;
-        Beneficiarios = _dataService.Beneficiarios;
-        Transferencias = _dataService.Transferencias;
     }
 
-    public ObservableCollection<Cuenta> Cuentas { get; }
-    public ObservableCollection<Beneficiario> Beneficiarios { get; }
-    public ObservableCollection<Transferencia> Transferencias { get; }
+    public ObservableCollection<Cuenta> Cuentas { get; } = [];
+    public ObservableCollection<Beneficiario> Beneficiarios { get; } = [];
+    public ObservableCollection<Transferencia> Transferencias { get; } = [];
+
+    [ObservableProperty]
+    private bool isCargando;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleButtonText))]
@@ -72,6 +71,47 @@ public partial class TransferenciasViewModel : ObservableObject
     [ObservableProperty]
     private string? montoError;
 
+    /// <summary>
+    /// Recarga las tres listas desde SQLite. Se llama en cada OnAppearing porque los saldos pueden
+    /// haber cambiado en otra pantalla (pago de una cuota, ejecución de una orden programada).
+    /// </summary>
+    public async Task CargarAsync()
+    {
+        IsCargando = true;
+        try
+        {
+            await _dataService.InicializarAsync();
+
+            var cuentas = await _dataService.ObtenerCuentasAsync();
+            var beneficiarios = await _dataService.ObtenerBeneficiariosAsync();
+            var transferencias = await _dataService.ObtenerTransferenciasAsync();
+
+            Cuentas.Clear();
+            foreach (var cuenta in cuentas)
+            {
+                Cuentas.Add(cuenta);
+            }
+
+            Beneficiarios.Clear();
+            foreach (var beneficiario in beneficiarios)
+            {
+                Beneficiarios.Add(beneficiario);
+            }
+
+            Transferencias.Clear();
+            foreach (var transferencia in transferencias)
+            {
+                Transferencias.Add(transferencia);
+            }
+
+            ActualizarEstado();
+        }
+        finally
+        {
+            IsCargando = false;
+        }
+    }
+
     public void ActualizarEstado()
     {
         PuedeTransferir = Cuentas.Count > 0 && Beneficiarios.Count > 0;
@@ -117,7 +157,7 @@ public partial class TransferenciasViewModel : ObservableObject
     [RelayCommand]
     private async Task EliminarAsync(Transferencia transferencia)
     {
-        var confirmar = await Shell.Current.DisplayAlert(
+        var confirmar = await Shell.Current.DisplayAlertAsync(
             "Eliminar transferencia",
             $"¿Seguro que deseas eliminar esta transferencia de {transferencia.Monto:C2}? El monto será devuelto a la cuenta origen.",
             "Eliminar",
@@ -128,13 +168,15 @@ public partial class TransferenciasViewModel : ObservableObject
             return;
         }
 
-        _dataService.EliminarTransferencia(transferencia);
+        await _dataService.EliminarTransferenciaAsync(transferencia);
 
         if (TransferenciaEnEdicion == transferencia)
         {
             IsFormVisible = false;
             LimpiarCampos();
         }
+
+        await CargarAsync();
     }
 
     [RelayCommand]
@@ -146,32 +188,41 @@ public partial class TransferenciasViewModel : ObservableObject
         }
 
         var monto = decimal.Parse(Monto, NumberStyles.Number, CultureInfo.InvariantCulture);
+        var beneficiarioNombre = BeneficiarioDestinoSeleccionado!.Nombre;
 
         if (IsEditMode)
         {
-            var transferencia = TransferenciaEnEdicion!;
+            var actualizada = await _dataService.ActualizarTransferenciaAsync(
+                TransferenciaEnEdicion!,
+                CuentaOrigenSeleccionada!,
+                BeneficiarioDestinoSeleccionado!,
+                Concepto.Trim(),
+                monto);
 
-            if (!_dataService.ActualizarTransferencia(transferencia, CuentaOrigenSeleccionada!, BeneficiarioDestinoSeleccionado!, Concepto.Trim(), monto))
+            if (!actualizada)
             {
                 MontoError = "Fondos insuficientes en la cuenta seleccionada.";
                 return;
             }
 
-            var beneficiarioActualizado = BeneficiarioDestinoSeleccionado!.Nombre;
-
             IsFormVisible = false;
             LimpiarCampos();
+            await CargarAsync();
 
-            await Shell.Current.DisplayAlert(
+            await Shell.Current.DisplayAlertAsync(
                 "Transferencia actualizada",
-                $"La transferencia a {beneficiarioActualizado} fue actualizada.",
+                $"La transferencia a {beneficiarioNombre} fue actualizada.",
                 "Aceptar");
             return;
         }
 
-        var beneficiarioNombre = BeneficiarioDestinoSeleccionado!.Nombre;
+        var registrada = await _dataService.RegistrarTransferenciaAsync(
+            CuentaOrigenSeleccionada!,
+            BeneficiarioDestinoSeleccionado!,
+            Concepto.Trim(),
+            monto);
 
-        if (!_dataService.RegistrarTransferencia(CuentaOrigenSeleccionada!, BeneficiarioDestinoSeleccionado!, Concepto.Trim(), monto))
+        if (!registrada)
         {
             MontoError = "Fondos insuficientes en la cuenta seleccionada.";
             return;
@@ -179,8 +230,9 @@ public partial class TransferenciasViewModel : ObservableObject
 
         IsFormVisible = false;
         LimpiarCampos();
+        await CargarAsync();
 
-        await Shell.Current.DisplayAlert(
+        await Shell.Current.DisplayAlertAsync(
             "Transferencia realizada",
             $"Se transfirieron {monto:C2} a {beneficiarioNombre}.",
             "Aceptar");

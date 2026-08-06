@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:InternetBankingApp.Models"
+             xmlns:vm="clr-namespace:InternetBankingApp.ViewModels"
+             x:Class="InternetBankingApp.Views.PrestamoDetallePage"
+             x:Name="PageRoot"
+             x:DataType="vm:PrestamoDetalleViewModel"
+             Title="{Binding Titulo}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <!-- Resumen del costo real del préstamo -->
+            <Border BackgroundColor="{StaticResource MidnightBlue}" Stroke="{StaticResource MidnightBlue}" Padding="20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="8" BindingContext="{Binding Prestamo}" x:DataType="models:Prestamo">
+                    <Label Text="{Binding Producto}" TextColor="{StaticResource EmeraldLight}" FontSize="13" />
+                    <Label Text="{Binding CuotaMensual, StringFormat='{0:C2} / mes'}"
+                           TextColor="{StaticResource White}"
+                           FontFamily="OpenSansSemibold"
+                           FontSize="28" />
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" RowSpacing="6">
+                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding MontoSolicitado, StringFormat='Capital: {0:C2}'}" TextColor="{StaticResource Gray200}" FontSize="12" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding TasaTexto, StringFormat='Tasa: {0}'}" TextColor="{StaticResource Gray200}" FontSize="12" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding TotalIntereses, StringFormat='Intereses: {0:C2}'}" TextColor="{StaticResource Gray200}" FontSize="12" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding TotalAPagar, StringFormat='Total a pagar: {0:C2}'}" TextColor="{StaticResource Gray200}" FontSize="12" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Progreso -->
+            <Border BackgroundColor="{StaticResource White}" Padding="16">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Avance del préstamo" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Label Grid.Column="1"
+                               Text="{Binding Prestamo.CuotasTexto}"
+                               TextColor="{StaticResource Gray500}"
+                               FontSize="13"
+                               VerticalOptions="Center" />
+                    </Grid>
+                    <ProgressBar Progress="{Binding Progreso}" ProgressColor="{StaticResource EmeraldDark}" HeightRequest="8" />
+                    <Grid ColumnDefinitions="*,*">
+                        <Label Grid.Column="0" Text="{Binding CapitalPagado, StringFormat='Capital pagado: {0:C2}'}" TextColor="{StaticResource Gray500}" FontSize="12" />
+                        <Label Grid.Column="1" Text="{Binding InteresesPagados, StringFormat='Intereses pagados: {0:C2}'}" TextColor="{StaticResource Gray500}" FontSize="12" />
+                    </Grid>
+                    <Label Text="{Binding Prestamo.SaldoPendiente, StringFormat='Te falta pagar {0:C2}'}"
+                           TextColor="{StaticResource Danger}"
+                           FontSize="13"
+                           IsVisible="{Binding EstaSaldado, Converter={StaticResource InverseBoolConverter}}" />
+                    <Label Text="✅ Préstamo saldado por completo."
+                           TextColor="{StaticResource EmeraldDark}"
+                           FontFamily="OpenSansSemibold"
+                           FontSize="14"
+                           IsVisible="{Binding EstaSaldado}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Pago de la próxima cuota -->
+            <Border BackgroundColor="{StaticResource White}" Padding="16" IsVisible="{Binding EstaSaldado, Converter={StaticResource InverseBoolConverter}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Pagar próxima cuota" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="16" />
+                    <Label Text="Debitar de la cuenta" TextColor="{StaticResource Gray500}" FontSize="13" />
+                    <Picker x:Name="CuentaPicker"
+                            Title="Selecciona una cuenta"
+                            ItemsSource="{Binding Cuentas}"
+                            SelectedItem="{Binding CuentaSeleccionada}" />
+                    <Label Text="{Binding PagoError}"
+                           TextColor="{StaticResource Danger}"
+                           FontSize="12"
+                           IsVisible="{Binding PagoError, Converter={StaticResource StringNotEmptyConverter}}" />
+                    <Button Text="{Binding TextoBotonPagar}"
+                            Command="{Binding PagarCuotaCommand}"
+                            IsEnabled="{Binding PuedePagar}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Tabla de amortización -->
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <Label Grid.Column="0"
+                       Text="Tabla de amortización"
+                       TextColor="{StaticResource MidnightBlue}"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="17"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="{Binding TextoFiltro}"
+                        FontSize="13"
+                        Padding="12,8"
+                        MinimumHeightRequest="36"
+                        Command="{Binding AlternarFiltroCommand}" />
+            </Grid>
+
+            <Border BackgroundColor="{StaticResource White}" Padding="0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+                <VerticalStackLayout>
+                    <Grid ColumnDefinitions="Auto,*,*,*" Padding="12,10" BackgroundColor="{StaticResource Secondary}" ColumnSpacing="6">
+                        <Label Grid.Column="0" Text="#" TextColor="{StaticResource MidnightBlue}" FontSize="12" FontFamily="OpenSansSemibold" WidthRequest="30" />
+                        <Label Grid.Column="1" Text="Capital" TextColor="{StaticResource MidnightBlue}" FontSize="12" FontFamily="OpenSansSemibold" HorizontalTextAlignment="End" />
+                        <Label Grid.Column="2" Text="Interés" TextColor="{StaticResource MidnightBlue}" FontSize="12" FontFamily="OpenSansSemibold" HorizontalTextAlignment="End" />
+                        <Label Grid.Column="3" Text="Balance" TextColor="{StaticResource MidnightBlue}" FontSize="12" FontFamily="OpenSansSemibold" HorizontalTextAlignment="End" />
+                    </Grid>
+
+                    <CollectionView ItemsSource="{Binding Cuotas}">
+                        <CollectionView.EmptyView>
+                            <Label Text="No hay cuotas que mostrar." TextColor="{StaticResource Gray400}" HorizontalOptions="Center" Margin="0,20" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:CuotaAmortizacion">
+                                <Grid ColumnDefinitions="Auto,*,*,*" RowDefinitions="Auto,Auto" Padding="12,10" ColumnSpacing="6">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding Numero}" TextColor="{StaticResource MidnightBlue}" FontSize="13" FontFamily="OpenSansSemibold" WidthRequest="30" />
+                                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding Capital, StringFormat='{0:N2}'}" TextColor="{StaticResource Gray600}" FontSize="13" HorizontalTextAlignment="End" />
+                                    <Label Grid.Row="0" Grid.Column="2" Text="{Binding Interes, StringFormat='{0:N2}'}" TextColor="{StaticResource Gray600}" FontSize="13" HorizontalTextAlignment="End" />
+                                    <Label Grid.Row="0" Grid.Column="3" Text="{Binding Balance, StringFormat='{0:N2}'}" TextColor="{StaticResource MidnightBlue}" FontSize="13" HorizontalTextAlignment="End" />
+                                    <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                           Text="{Binding Fecha, StringFormat='{0:dd/MM/yyyy}'}"
+                                           TextColor="{StaticResource Gray400}"
+                                           FontSize="11" />
+                                    <Label Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"
+                                           Text="{Binding EstadoTexto}"
+                                           TextColor="{StaticResource Gray400}"
+                                           FontSize="11"
+                                           HorizontalTextAlignment="End" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Historial de pagos ya realizados -->
+            <Label Text="Pagos realizados"
+                   TextColor="{StaticResource MidnightBlue}"
+                   FontFamily="OpenSansSemibold"
+                   FontSize="17"
+                   IsVisible="{Binding HayPagos}" />
+
+            <CollectionView ItemsSource="{Binding Pagos}" IsVisible="{Binding HayPagos}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:PagoPrestamo">
+                        <Border Stroke="{StaticResource Gray200}" Margin="0,0,0,10" Padding="14" BackgroundColor="{StaticResource White}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding NumeroCuota, StringFormat='Cuota {0}'}" TextColor="{StaticResource MidnightBlue}" FontFamily="OpenSansSemibold" FontSize="14" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Monto, StringFormat='{0:C2}'}" TextColor="{StaticResource EmeraldDark}" FontFamily="OpenSansSemibold" />
+                                <Label Grid.Row="1" Grid.Column="0" Text="{Binding CuentaOrigen, StringFormat='Debitado de {0}'}" TextColor="{StaticResource Gray500}" FontSize="12" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Fecha, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray400}" FontSize="12" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Button Text="Volver a préstamos" Style="{StaticResource DangerButtonStyle}" Command="{Binding VolverCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -11,6 +11,9 @@ public partial class AppShell : Shell
 	{
 		InitializeComponent();
 		_authService = authService;
+
+		// El detalle de préstamo no va en el flyout: se abre con parámetro desde la lista.
+		Routing.RegisterRoute(nameof(PrestamoDetallePage), typeof(PrestamoDetallePage));
 	}
 
 	private async void OnCerrarSesionClicked(object? sender, EventArgs e)

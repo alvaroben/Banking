@@ -16,14 +16,12 @@
                              Padding="30,70,30,50"
                              Spacing="10">
 
-            <BoxView HeightRequest="56"
-                     WidthRequest="56"
-                     Color="{StaticResource Emerald}"
-                     HorizontalOptions="Center">
-                <BoxView.Clip>
-                    <EllipseGeometry Center="28,28" RadiusX="28" RadiusY="28" />
-                </BoxView.Clip>
-            </BoxView>
+            <Image Source="logo.png"
+                   HeightRequest="88"
+                   WidthRequest="88"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,6" />
 
             <Label Text="Internet Banking"
                    TextColor="{StaticResource White}"
@@ -107,6 +105,12 @@
                         HorizontalOptions="Fill"
                         Margin="0,10,0,0"
                         Command="{Binding IniciarSesionCommand}" />
+
+                <!-- Credenciales de la demostración, para que quien evalúe la app pueda entrar -->
+                <Label Text="Acceso de demostración:  admin  /  admin123"
+                       TextColor="{StaticResource Gray400}"
+                       FontSize="12"
+                       HorizontalOptions="Center" />
 
             </VerticalStackLayout>
         </Border>

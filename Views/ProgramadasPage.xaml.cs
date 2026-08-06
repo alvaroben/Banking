@@ -3,17 +3,16 @@ using InternetBankingApp.ViewModels;
 
 namespace InternetBankingApp.Views;
 
-public partial class TransferenciasPage : ContentPage
+public partial class ProgramadasPage : ContentPage
 {
-    private readonly TransferenciasViewModel _viewModel;
+    private readonly ProgramadasViewModel _viewModel;
 
-    public TransferenciasPage(TransferenciasViewModel viewModel)
+    public ProgramadasPage(ProgramadasViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;
 
-        // El resumen incluye el saldo, así el usuario elige la cuenta viendo con cuánto cuenta.
         CuentaPicker.ItemDisplayBinding = new Binding(nameof(Cuenta.Resumen));
         BeneficiarioPicker.ItemDisplayBinding = new Binding(nameof(Beneficiario.Resumen));
     }
@@ -21,8 +20,6 @@ public partial class TransferenciasPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-
-        // Inicialización lazy de SQLite + recarga de cuentas, beneficiarios e historial.
         await _viewModel.CargarAsync();
     }
 }

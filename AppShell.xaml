@@ -5,7 +5,28 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:InternetBankingApp.Views"
     Shell.FlyoutBehavior="Disabled"
-    Title="InternetBankingApp">
+    Title="Internet Banking">
+
+    <!-- Encabezado de marca del menú lateral: logotipo sobre el navy institucional -->
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="{StaticResource Tertiary}" Padding="20,36,20,24" ColumnDefinitions="Auto,*" ColumnSpacing="14">
+            <Image Grid.Column="0"
+                   Source="logo.png"
+                   HeightRequest="52"
+                   WidthRequest="52"
+                   Aspect="AspectFit"
+                   VerticalOptions="Center" />
+            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                <Label Text="Internet Banking"
+                       TextColor="{StaticResource White}"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="18" />
+                <Label Text="Tu patrimonio, siempre en crecimiento"
+                       TextColor="{StaticResource EmeraldLight}"
+                       FontSize="12" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
 
     <!-- Plantilla explícita para los ítems del flyout: el color de texto por defecto del Shell
          (Shell.UnselectedColor/ForegroundColor) no siempre se respeta en todas las plataformas,
@@ -54,6 +75,10 @@
         Route="LoginPage"
         Shell.FlyoutItemIsVisible="False" />
 
+    <FlyoutItem Title="📊  Inicio" Route="DashboardPage">
+        <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" />
+    </FlyoutItem>
+
     <FlyoutItem Title="🏦  Cuentas" Route="CuentasPage">
         <ShellContent ContentTemplate="{DataTemplate views:CuentasPage}" />
     </FlyoutItem>
@@ -68,6 +93,10 @@
 
     <FlyoutItem Title="🔁  Transferencias" Route="TransferenciasPage">
         <ShellContent ContentTemplate="{DataTemplate views:TransferenciasPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="🗓️  Programadas" Route="ProgramadasPage">
+        <ShellContent ContentTemplate="{DataTemplate views:ProgramadasPage}" />
     </FlyoutItem>
 
     <MenuItem Text="🚪  Cerrar sesión" Clicked="OnCerrarSesionClicked" />
