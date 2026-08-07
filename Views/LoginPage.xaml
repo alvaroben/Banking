@@ -21,18 +21,18 @@
                    WidthRequest="88"
                    Aspect="AspectFit"
                    HorizontalOptions="Center"
-                   Margin="0,0,0,6" />
+                   Margin="0,0,0,6"/>
 
             <Label Text="Internet Banking"
                    TextColor="{StaticResource White}"
                    FontFamily="OpenSansSemibold"
                    FontSize="26"
-                   HorizontalOptions="Center" />
+                   HorizontalOptions="Center"/>
 
             <Label Text="Tu patrimonio, siempre en crecimiento"
                    TextColor="{StaticResource EmeraldLight}"
                    FontSize="14"
-                   HorizontalOptions="Center" />
+                   HorizontalOptions="Center"/>
         </VerticalStackLayout>
 
         <!-- Tarjeta de acceso -->
@@ -43,13 +43,13 @@
                 Padding="25,35"
                 VerticalOptions="Start">
             <Border.StrokeShape>
-                <RoundRectangle CornerRadius="20" />
+                <RoundRectangle CornerRadius="20"/>
             </Border.StrokeShape>
             <Border.Shadow>
                 <Shadow Brush="{StaticResource Tertiary}"
                         Opacity="0.18"
                         Radius="20"
-                        Offset="0,8" />
+                        Offset="0,8"/>
             </Border.Shadow>
 
             <VerticalStackLayout Spacing="18">
@@ -57,60 +57,58 @@
                 <Label Text="Iniciar sesión"
                        TextColor="{StaticResource MidnightBlue}"
                        FontFamily="OpenSansSemibold"
-                       FontSize="20" />
+                       FontSize="20"/>
 
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="Usuario" TextColor="{StaticResource Gray500}" FontSize="13" />
+                    <Label Text="Usuario"
+                            TextColor="{StaticResource Gray500}"
+                            FontSize="13"/>
                     <Border Stroke="{StaticResource Gray200}"
                             StrokeThickness="1"
                             Padding="14,0">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="10" />
+                            <RoundRectangle CornerRadius="10"/>
                         </Border.StrokeShape>
                         <Entry Text="{Binding Usuario}"
                                Placeholder="Ingresa tu usuario"
-                               PlaceholderColor="{StaticResource Gray300}" />
+                               PlaceholderColor="{StaticResource Gray300}"/>
                     </Border>
                     <Label Text="{Binding UsuarioError}"
                            TextColor="{StaticResource Danger}"
                            FontSize="12"
-                           IsVisible="{Binding UsuarioError, Converter={StaticResource StringNotEmptyConverter}}" />
+                           IsVisible="{Binding UsuarioError, Converter={StaticResource StringNotEmptyConverter}}"/>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="Contraseña" TextColor="{StaticResource Gray500}" FontSize="13" />
+                    <Label Text="Contraseña"
+                            TextColor="{StaticResource Gray500}"
+                            FontSize="13"/>
                     <Border Stroke="{StaticResource Gray200}"
                             StrokeThickness="1"
                             Padding="14,0">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="10" />
+                            <RoundRectangle CornerRadius="10"/>
                         </Border.StrokeShape>
                         <Entry Text="{Binding Contrasena}"
                                Placeholder="Ingresa tu contraseña"
                                PlaceholderColor="{StaticResource Gray300}"
-                               IsPassword="True" />
+                               IsPassword="True"/>
                     </Border>
                     <Label Text="{Binding ContrasenaError}"
                            TextColor="{StaticResource Danger}"
                            FontSize="12"
-                           IsVisible="{Binding ContrasenaError, Converter={StaticResource StringNotEmptyConverter}}" />
+                           IsVisible="{Binding ContrasenaError, Converter={StaticResource StringNotEmptyConverter}}"/>
                 </VerticalStackLayout>
 
                 <Label Text="{Binding ErrorMensaje}"
                        TextColor="{StaticResource Danger}"
                        FontSize="13"
-                       IsVisible="{Binding ErrorMensaje, Converter={StaticResource StringNotEmptyConverter}}" />
+                       IsVisible="{Binding ErrorMensaje, Converter={StaticResource StringNotEmptyConverter}}"/>
 
                 <Button Text="Iniciar Sesión"
                         HorizontalOptions="Fill"
                         Margin="0,10,0,0"
-                        Command="{Binding IniciarSesionCommand}" />
-
-                <!-- Credenciales de la demostración, para que quien evalúe la app pueda entrar -->
-                <Label Text="Acceso de demostración:  admin  /  admin123"
-                       TextColor="{StaticResource Gray400}"
-                       FontSize="12"
-                       HorizontalOptions="Center" />
+                        Command="{Binding IniciarSesionCommand}"/>
 
             </VerticalStackLayout>
         </Border>

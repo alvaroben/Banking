@@ -55,14 +55,14 @@ public static class DatosEjemploService
                 NumeroCuenta = CuentaAhorro,
                 Tipo = TipoCuenta.Ahorro,
                 FechaApertura = hoy.AddYears(-2).AddMonths(-3),
-                Saldo = 485_000.00m
+                Saldo = 815_000.00m
             },
             new Cuenta
             {
                 NumeroCuenta = CuentaCorriente,
                 Tipo = TipoCuenta.Corriente,
                 FechaApertura = hoy.AddMonths(-14),
-                Saldo = 128_600.75m
+                Saldo = 142_600.75m
             }
         });
     }
@@ -172,27 +172,29 @@ public static class DatosEjemploService
     /// Las tasas y nombres salen del catálogo de <see cref="AmortizacionService"/>, no inventados,
     /// para que al abrir el préstamo en modo edición el Picker de producto lo reconozca.
     ///
-    /// Los montos y plazos se mantienen moderados a propósito. El dashboard calcula la deuda con
-    /// <c>SaldoPendiente</c> = cuota × cuotas restantes, es decir, todo lo que falta por desembolsar
-    /// (capital + intereses futuros). Con un hipotecario a 20 años eso da millones y hunde el
-    /// patrimonio neto hasta parecer un error de datos; con esta cartera queda en un rango creíble.
-    /// El hipotecario sigue disponible en el catálogo para probar el simulador a mano.
+    /// Los montos, plazos y cuotas ya pagadas están calibrados para que el patrimonio neto del
+    /// dashboard quede positivo. El dashboard calcula la deuda con <c>SaldoPendiente</c> = cuota ×
+    /// cuotas restantes, es decir, todo lo que falta por desembolsar (capital + intereses futuros),
+    /// así que la cartera se mantiene por debajo del saldo de las cuentas: con esta combinación son
+    /// ~615 mil de deuda contra ~957 mil de saldo. Si se suben los montos o se bajan las cuotas
+    /// pagadas, el patrimonio se vuelve negativo. El hipotecario, que por sí solo lo hundiría, sigue
+    /// disponible en el catálogo para probar el simulador a mano.
     /// </summary>
     private static async Task SembrarPrestamosAsync(SQLiteAsyncConnection conexion, DateTime hoy)
     {
         var prestamos = new[]
         {
-            // A media vida: la tabla mezcla cuotas pagadas y pendientes.
-            Construir("Préstamo de vehículo", 620_000m, 48, hoy.AddMonths(-14), cuotasPagadas: 14),
+            // Pasada la mitad del plazo: la tabla mezcla cuotas pagadas y pendientes.
+            Construir("Préstamo de vehículo", 480_000m, 48, hoy.AddMonths(-31), cuotasPagadas: 31),
 
             // El más largo de la cartera: al principio el interés pesa mucho más que el capital.
-            Construir("Préstamo comercial", 450_000m, 60, hoy.AddMonths(-20), cuotasPagadas: 20),
+            Construir("Préstamo comercial", 300_000m, 60, hoy.AddMonths(-41), cuotasPagadas: 41),
 
             // Casi saldado: quedan 2 cuotas, ideal para demostrar el pago que cierra el préstamo.
             Construir("Préstamo personal", 180_000m, 24, hoy.AddMonths(-22), cuotasPagadas: 22),
 
             // Recién desembolsado.
-            Construir("Préstamo educativo", 320_000m, 36, hoy.AddMonths(-3), cuotasPagadas: 3)
+            Construir("Préstamo educativo", 240_000m, 36, hoy.AddMonths(-4), cuotasPagadas: 4)
         };
 
         foreach (var prestamo in prestamos)
