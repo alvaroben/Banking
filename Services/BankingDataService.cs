@@ -54,6 +54,10 @@ public class BankingDataService
             await conexion.CreateTableAsync<TransferenciaProgramada>().ConfigureAwait(false);
             await conexion.CreateTableAsync<PagoPrestamo>().ConfigureAwait(false);
 
+            // Primera ejecución: deja la app con un escenario demostrable (cuentas, seis meses de
+            // transferencias y préstamos a distinto nivel de avance). No hace nada si ya hay datos.
+            await DatosEjemploService.SembrarSiVacioAsync(conexion).ConfigureAwait(false);
+
             _conexion = conexion;
             return conexion;
         }

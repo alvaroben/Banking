@@ -47,6 +47,15 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
 
+	<!-- Android en Debug: por defecto usa "Fast Deployment", que deja los ensamblados .NET FUERA del
+	     APK (en files/.__override__) y solo los sincroniza el comando de despliegue. Eso hace que la
+	     app arranque bien recién desplegada, pero se cierre de inmediato al abrirla desde el ícono
+	     más tarde, porque no encuentra los ensamblados. Empaquetarlos dentro del APK hace que la
+	     instalación sea autosuficiente. -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0B3550" />
